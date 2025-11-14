@@ -1,0 +1,56 @@
+flow data_pipeline {
+    description "A more complex data processing pipeline"
+
+    // Input data
+    node data1: core.constant {
+        value = 10
+        position(50, 100)
+    }
+
+    node data2: core.constant {
+        value = 20
+        position(50, 200)
+    }
+
+    node data3: core.constant {
+        value = 30
+        position(50, 300)
+    }
+
+    // First stage: add data1 + data2
+    node stage1: math.add {
+        position(250, 150)
+    }
+
+    // Second stage: multiply result by data3
+    node stage2: math.multiply {
+        position(450, 200)
+    }
+
+    // Third stage: add 100 to the result
+    node bonus: core.constant {
+        value = 100
+        position(450, 300)
+    }
+
+    node stage3: math.add {
+        position(650, 250)
+    }
+
+    // Debug final result
+    node result: core.debug {
+        position(850, 250)
+    }
+
+    // Pipeline connections
+    connect data1.value -> stage1.a
+    connect data2.value -> stage1.b
+    connect stage1.result -> stage2.a
+    connect data3.value -> stage2.b
+    connect stage2.result -> stage3.a
+    connect bonus.value -> stage3.b
+    connect stage3.result -> result.input
+
+    // Output: should be (10 + 20) * 30 + 100 = 1000
+    output result.output
+}

@@ -7,6 +7,7 @@ Circuit is a flexible, cross-platform runtime engine that allows you to create a
 ## 🌟 Features
 
 - **Universal Blocks**: Write computational blocks in Rust once, use everywhere
+- **Declarative Language**: Define blocks and flows using `.block` and `.flow` files
 - **Cross-Platform**: Run on iOS, macOS, Android, and Web (via WebAssembly)
 - **Type-Safe**: Strong typing with Rust's safety guarantees
 - **Visual Flow**: Node-based execution graphs for clear data flow
@@ -14,6 +15,7 @@ Circuit is a flexible, cross-platform runtime engine that allows you to create a
 - **Zero-Copy FFI**: Efficient cross-language communication
 - **Cycle Detection**: Automatic validation of graph structures
 - **Topological Execution**: Optimized execution order
+- **Comprehensive Testing**: Unit, integration, and WASM tests included
 
 ## 🚀 Quick Start
 
@@ -69,28 +71,36 @@ See [React Documentation](docs/REACT.md) for detailed integration.
 
 ## 📦 Architecture
 
-Circuit consists of three main packages:
+Circuit consists of four main packages:
 
 ### 1. **circuit-core**
 The core runtime engine written in Rust.
 
 - **Blocks**: Reusable computational units
-- **Graphs**: Visual flow definitions  
+- **Graphs**: Visual flow definitions
 - **Engine**: Execution runtime with topological sorting
 - **Values**: Type-safe data flow between blocks
 
-### 2. **circuit-wasm**
+### 2. **circuit-lang**
+Language parser for `.block` and `.flow` files.
+
+- **Declarative Syntax**: Define blocks and flows in a simple, readable format
+- **Type System**: Support for Number, String, Bool, Array, Object, and more
+- **Converter**: Convert flow definitions to executable graphs
+- **Examples**: Pre-built example blocks and flows
+
+### 3. **circuit-wasm**
 WebAssembly bindings for running in browsers and JavaScript environments.
 
 - Zero-copy data transfer
 - JavaScript-friendly API
 - React/Vue/Angular compatible
 
-### 3. **circuit-ffi**
+### 4. **circuit-ffi**
 C-compatible FFI layer for native platform integration.
 
 - Swift bindings (iOS/macOS)
-- Kotlin bindings (Android)  
+- Kotlin bindings (Android)
 - Static and dynamic library support
 
 ## 🏗️ Building
@@ -137,7 +147,42 @@ wasm-pack build --target web
 
 ## 📖 Creating Custom Blocks
 
-Blocks are the building units of Circuit applications. Here's how to create one:
+### Using .block Files (Recommended)
+
+The easiest way to create blocks is using `.block` files:
+
+```
+block math.square {
+    description "Squares a number (x²)"
+
+    input x: Number {
+        description "The number to square"
+    }
+
+    output result: Number {
+        description "The squared result"
+    }
+
+    execute {
+        result = x * x
+    }
+}
+```
+
+Load and use it:
+
+```rust
+use circuit_lang::{parse_block, flow_to_graph};
+
+let source = std::fs::read_to_string("math.square.block")?;
+let block_def = parse_block(&source)?;
+```
+
+See the [Language Documentation](docs/LANGUAGE.md) for complete syntax reference.
+
+### Using Rust (Advanced)
+
+You can also create blocks programmatically in Rust:
 
 ```rust
 use circuit_core::*;
@@ -182,9 +227,38 @@ impl Block for MyBlock {
 }
 ```
 
-## 🎯 Example: Calculator
+## 🎯 Examples
 
-See the [calculator example](examples/calculator.rs) for a complete working example:
+### Example 1: Calculator Flow
+
+The calculator flow demonstrates basic arithmetic operations:
+
+```flow
+flow calculator {
+    description "Simple calculator: (5 + 3) * 2 = 16"
+
+    node const5: core.constant {
+        value = 5
+    }
+
+    node const3: core.constant {
+        value = 3
+    }
+
+    node add: math.add
+    node multiply: math.multiply
+
+    connect const5.value -> add.a
+    connect const3.value -> add.b
+    connect add.result -> multiply.a
+}
+```
+
+See [examples/flows/calculator.flow](examples/flows/calculator.flow) and other examples in the `examples/` directory.
+
+### Example 2: Programmatic (Rust)
+
+See the [calculator example](examples/calculator.rs) for a complete Rust example:
 
 ```bash
 cargo run --example calculator
@@ -200,20 +274,39 @@ This demonstrates:
 
 ## 🧪 Testing
 
+Circuit includes comprehensive testing across all packages:
+
 ```bash
 # Run all tests
 cargo test
 
 # Run tests for specific package
-cargo test -p circuit-core
-cargo test -p circuit-ffi
+cargo test -p circuit-core      # Core engine tests
+cargo test -p circuit-lang      # Language parser tests
+cargo test -p circuit-ffi       # FFI layer tests
+cargo test -p circuit-wasm      # WASM tests
+
+# Run integration tests (tests example files)
+cargo test -p circuit-lang --test integration_tests
 
 # Run with output
 cargo test -- --nocapture
 ```
 
+### Test Coverage
+
+- **circuit-core**: 15 unit tests covering blocks, graphs, engine, and values
+- **circuit-lang**: 20+ tests for parser and converter
+- **circuit-lang integration**: Tests for all example .block and .flow files
+- **circuit-ffi**: Engine lifecycle tests
+- **circuit-wasm**: 10+ WASM-specific tests
+
+All tests are run automatically via GitHub Actions CI/CD on every commit.
+
 ## 📚 Documentation
 
+- [Language Specification](docs/LANGUAGE.md) - Complete guide to `.block` and `.flow` syntax
+- [API Reference](docs/API.md) - Core API documentation
 - [Swift/iOS Integration](docs/SWIFT.md)
 - [Kotlin/Android Integration](docs/KOTLIN.md)
 - [React/Web Integration](docs/REACT.md)
@@ -235,14 +328,18 @@ Circuit includes several built-in blocks:
 
 ## 🛣️ Roadmap
 
+- [x] Declarative language for blocks and flows
+- [x] Comprehensive testing infrastructure
+- [x] Parser for `.block` and `.flow` files
 - [ ] More built-in blocks (subtract, divide, modulo, etc.)
 - [ ] Visual graph editor (web-based)
-- [ ] Graph serialization to/from JSON
+- [ ] Block execution interpreter (for `.block` execute blocks)
 - [ ] Hot-reload support
-- [ ] Performance optimizations
+- [ ] Performance optimizations and benchmarks
 - [ ] Async block execution
 - [ ] Streaming data support
 - [ ] Graph versioning
+- [ ] Standard library of common blocks
 
 ## 🤝 Contributing
 

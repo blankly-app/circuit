@@ -1,0 +1,20 @@
+block math.power {
+    description "Raises a base to an exponent (base^exponent)"
+
+    input base: Number {
+        description "The base number"
+    }
+
+    input exponent: Number {
+        description "The exponent"
+        default = 2
+    }
+
+    output result: Number {
+        description "The result of base^exponent"
+    }
+
+    execute {
+        result = base * base
+    }
+}

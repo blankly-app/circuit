@@ -1,0 +1,19 @@
+[package]
+name = "circuit-lang"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+circuit-core = { path = "../circuit-core" }
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+anyhow.workspace = true
+pest = "2.7"
+pest_derive = "2.7"
+
+[dev-dependencies]
+pretty_assertions = "1.4"

@@ -3,6 +3,7 @@ members = [
     "circuit-core",
     "circuit-wasm",
     "circuit-ffi",
+    "circuit-lang",
 ]
 resolver = "2"
 

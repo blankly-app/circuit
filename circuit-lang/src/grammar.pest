@@ -1,0 +1,138 @@
+// Circuit Language Grammar
+// Supports .block and .flow file definitions
+
+WHITESPACE = _{ " " | "\t" | "\r" | "\n" }
+COMMENT = _{ "//" ~ (!"\n" ~ ANY)* }
+
+// Identifiers and literals
+identifier = @{ ASCII_ALPHA ~ (ASCII_ALPHANUMERIC | "_")* }
+qualified_name = @{ identifier ~ ("." ~ identifier)* }
+string_literal = @{ "\"" ~ (!"\"" ~ ANY)* ~ "\"" }
+number_literal = @{ "-"? ~ ASCII_DIGIT+ ~ ("." ~ ASCII_DIGIT+)? }
+bool_literal = @{ "true" | "false" }
+null_literal = @{ "null" }
+
+// Value types
+value_type = { "Number" | "String" | "Bool" | "Array" | "Object" | "Bytes" | "Any" }
+
+// Values
+value = {
+    null_literal
+    | bool_literal
+    | number_literal
+    | string_literal
+    | array_value
+    | object_value
+}
+
+array_value = { "[" ~ (value ~ ("," ~ value)*)? ~ "]" }
+object_value = { "{" ~ (object_pair ~ ("," ~ object_pair)*)? ~ "}" }
+object_pair = { (identifier | string_literal) ~ ":" ~ value }
+
+// Block definition (.block files)
+block_def = {
+    SOI ~ "block" ~ qualified_name ~ "{" ~ block_body ~ "}" ~ EOI
+}
+
+block_body = {
+    (description_stmt | input_def | output_def | config_def | execute_block)*
+}
+
+description_stmt = { "description" ~ string_literal }
+
+input_def = {
+    "input" ~ identifier ~ ":" ~ value_type ~ ("{" ~ input_body ~ "}")?
+}
+
+input_body = { (description_stmt | default_stmt)* }
+
+default_stmt = { "default" ~ "=" ~ value }
+
+output_def = {
+    "output" ~ identifier ~ ":" ~ value_type ~ ("{" ~ output_body ~ "}")?
+}
+
+output_body = { description_stmt* }
+
+config_def = {
+    "config" ~ identifier ~ ":" ~ value_type ~ ("{" ~ config_body ~ "}")?
+}
+
+config_body = { (description_stmt | default_stmt)* }
+
+execute_block = {
+    "execute" ~ "{" ~ statement* ~ "}"
+}
+
+// Simple expression language for execute blocks
+statement = {
+    assignment_stmt
+    | return_stmt
+    | if_stmt
+    | comment_stmt
+}
+
+comment_stmt = { "//" ~ (!"\n" ~ ANY)* }
+
+assignment_stmt = { identifier ~ "=" ~ expression }
+
+return_stmt = { "return" ~ expression }
+
+if_stmt = {
+    "if" ~ expression ~ "{" ~ statement* ~ "}" ~
+    ("else" ~ "{" ~ statement* ~ "}")?
+}
+
+expression = {
+    binary_expr
+    | unary_expr
+    | call_expr
+    | member_expr
+    | primary_expr
+}
+
+binary_expr = { primary_expr ~ binary_op ~ expression }
+binary_op = { "+" | "-" | "*" | "/" | "%" | "==" | "!=" | "<" | ">" | "<=" | ">=" | "&&" | "||" }
+
+unary_expr = { unary_op ~ expression }
+unary_op = { "!" | "-" }
+
+call_expr = { identifier ~ "(" ~ (expression ~ ("," ~ expression)*)? ~ ")" }
+
+member_expr = { identifier ~ ("." ~ identifier)+ }
+
+primary_expr = {
+    "(" ~ expression ~ ")"
+    | value
+    | identifier
+}
+
+// Flow definition (.flow files)
+flow_def = {
+    SOI ~ "flow" ~ identifier ~ "{" ~ flow_body ~ "}" ~ EOI
+}
+
+flow_body = {
+    (description_stmt | node_def | connect_stmt | output_stmt)*
+}
+
+node_def = {
+    "node" ~ identifier ~ ":" ~ qualified_name ~ ("{" ~ node_body ~ "}")?
+}
+
+node_body = { (config_assign | position_stmt)* }
+
+config_assign = { identifier ~ "=" ~ value }
+
+position_stmt = { "position" ~ "(" ~ number_literal ~ "," ~ number_literal ~ ")" }
+
+connect_stmt = {
+    "connect" ~ port_ref ~ "->" ~ port_ref
+}
+
+port_ref = { identifier ~ "." ~ identifier }
+
+output_stmt = { "output" ~ port_ref }
+
+// Top-level file parser
+file = { SOI ~ (block_def | flow_def) ~ EOI }
