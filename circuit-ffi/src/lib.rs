@@ -1,8 +1,8 @@
 use circuit_core::{Engine, Graph};
+use std::collections::HashMap;
 use std::ffi::{CStr, CString};
 use std::os::raw::c_char;
 use std::sync::{Arc, Mutex};
-use std::collections::HashMap;
 
 // Global engine registry
 lazy_static::lazy_static! {
@@ -17,7 +17,7 @@ pub extern "C" fn circuit_engine_create() -> u64 {
     let mut next_id = NEXT_ENGINE_ID.lock().unwrap();
     let id = *next_id;
     *next_id += 1;
-    
+
     ENGINES.lock().unwrap().insert(id, engine);
     id
 }
@@ -30,7 +30,12 @@ pub extern "C" fn circuit_engine_destroy(handle: u64) {
 
 /// Load a graph from JSON string
 /// Returns 0 on success, non-zero on error
+///
+/// # Safety
+/// This function is unsafe because it dereferences raw pointers from C.
+/// The caller must ensure the pointers are valid.
 #[no_mangle]
+#[allow(clippy::not_unsafe_ptr_arg_deref)]
 pub extern "C" fn circuit_load_graph(
     handle: u64,
     json: *const c_char,
@@ -81,7 +86,12 @@ pub extern "C" fn circuit_load_graph(
 
 /// Execute a graph and return results as JSON
 /// Returns a C string that must be freed with circuit_free_string
+///
+/// # Safety
+/// This function is unsafe because it dereferences raw pointers from C.
+/// The caller must ensure the pointers are valid.
 #[no_mangle]
+#[allow(clippy::not_unsafe_ptr_arg_deref)]
 pub extern "C" fn circuit_execute_graph(
     handle: u64,
     graph_id: *const c_char,
@@ -136,7 +146,12 @@ pub extern "C" fn circuit_execute_graph(
 }
 
 /// Free a string allocated by circuit_execute_graph
+///
+/// # Safety
+/// This function is unsafe because it takes ownership of a raw pointer.
+/// The caller must ensure the pointer was allocated by this library.
 #[no_mangle]
+#[allow(clippy::not_unsafe_ptr_arg_deref)]
 pub extern "C" fn circuit_free_string(s: *mut c_char) {
     if !s.is_null() {
         unsafe {

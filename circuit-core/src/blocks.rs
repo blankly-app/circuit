@@ -48,11 +48,15 @@ impl Block for AddBlock {
         let a = context
             .get_input("a")
             .and_then(|v| v.as_float())
-            .ok_or_else(|| CircuitError::InvalidInput("Missing or invalid input 'a'".to_string()))?;
+            .ok_or_else(|| {
+                CircuitError::InvalidInput("Missing or invalid input 'a'".to_string())
+            })?;
         let b = context
             .get_input("b")
             .and_then(|v| v.as_float())
-            .ok_or_else(|| CircuitError::InvalidInput("Missing or invalid input 'b'".to_string()))?;
+            .ok_or_else(|| {
+                CircuitError::InvalidInput("Missing or invalid input 'b'".to_string())
+            })?;
 
         let mut outputs = HashMap::new();
         outputs.insert("result".to_string(), Value::Float(a + b));
@@ -97,11 +101,15 @@ impl Block for MultiplyBlock {
         let a = context
             .get_input("a")
             .and_then(|v| v.as_float())
-            .ok_or_else(|| CircuitError::InvalidInput("Missing or invalid input 'a'".to_string()))?;
+            .ok_or_else(|| {
+                CircuitError::InvalidInput("Missing or invalid input 'a'".to_string())
+            })?;
         let b = context
             .get_input("b")
             .and_then(|v| v.as_float())
-            .ok_or_else(|| CircuitError::InvalidInput("Missing or invalid input 'b'".to_string()))?;
+            .ok_or_else(|| {
+                CircuitError::InvalidInput("Missing or invalid input 'b'".to_string())
+            })?;
 
         let mut outputs = HashMap::new();
         outputs.insert("result".to_string(), Value::Float(a * b));
@@ -182,11 +190,15 @@ impl Block for ConcatBlock {
         let a = context
             .get_input("a")
             .and_then(|v| v.as_str())
-            .ok_or_else(|| CircuitError::InvalidInput("Missing or invalid input 'a'".to_string()))?;
+            .ok_or_else(|| {
+                CircuitError::InvalidInput("Missing or invalid input 'a'".to_string())
+            })?;
         let b = context
             .get_input("b")
             .and_then(|v| v.as_str())
-            .ok_or_else(|| CircuitError::InvalidInput("Missing or invalid input 'b'".to_string()))?;
+            .ok_or_else(|| {
+                CircuitError::InvalidInput("Missing or invalid input 'b'".to_string())
+            })?;
 
         let mut outputs = HashMap::new();
         outputs.insert("result".to_string(), Value::String(format!("{}{}", a, b)));
@@ -263,20 +275,32 @@ mod tests {
     fn test_constant_block() {
         let block = ConstantBlock;
         let mut context = BlockContext::new();
-        context.config.insert("value".to_string(), Value::String("Hello".to_string()));
+        context
+            .config
+            .insert("value".to_string(), Value::String("Hello".to_string()));
 
         let result = block.execute(context).unwrap();
-        assert_eq!(result.get("value"), Some(&Value::String("Hello".to_string())));
+        assert_eq!(
+            result.get("value"),
+            Some(&Value::String("Hello".to_string()))
+        );
     }
 
     #[test]
     fn test_concat_block() {
         let block = ConcatBlock;
         let mut context = BlockContext::new();
-        context.inputs.insert("a".to_string(), Value::String("Hello".to_string()));
-        context.inputs.insert("b".to_string(), Value::String(" World".to_string()));
+        context
+            .inputs
+            .insert("a".to_string(), Value::String("Hello".to_string()));
+        context
+            .inputs
+            .insert("b".to_string(), Value::String(" World".to_string()));
 
         let result = block.execute(context).unwrap();
-        assert_eq!(result.get("result"), Some(&Value::String("Hello World".to_string())));
+        assert_eq!(
+            result.get("result"),
+            Some(&Value::String("Hello World".to_string()))
+        );
     }
 }

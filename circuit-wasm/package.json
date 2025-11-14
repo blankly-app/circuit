@@ -1,0 +1,35 @@
+{
+  "name": "@circuit/wasm",
+  "version": "0.1.0",
+  "description": "WebAssembly bindings for Circuit - a node-based runtime engine",
+  "main": "circuit_wasm.js",
+  "types": "circuit_wasm.d.ts",
+  "files": [
+    "circuit_wasm_bg.wasm",
+    "circuit_wasm.js",
+    "circuit_wasm.d.ts"
+  ],
+  "module": "circuit_wasm.js",
+  "sideEffects": [
+    "./circuit_wasm.js"
+  ],
+  "keywords": [
+    "circuit",
+    "nodes",
+    "graph",
+    "dataflow",
+    "blocks",
+    "wasm",
+    "webassembly"
+  ],
+  "author": "Circuit Contributors",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/blankly-app/circuit"
+  },
+  "homepage": "https://github.com/blankly-app/circuit",
+  "bugs": {
+    "url": "https://github.com/blankly-app/circuit/issues"
+  }
+}

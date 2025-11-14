@@ -151,10 +151,10 @@ impl Graph {
         }
 
         for node_id in self.nodes.keys() {
-            if !visited.contains(node_id.as_str()) {
-                if has_cycle(node_id, &adjacency, &mut visited, &mut rec_stack) {
-                    return Ok(true);
-                }
+            if !visited.contains(node_id.as_str())
+                && has_cycle(node_id, &adjacency, &mut visited, &mut rec_stack)
+            {
+                return Ok(true);
             }
         }
 

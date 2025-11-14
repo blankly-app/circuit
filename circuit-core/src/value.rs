@@ -2,10 +2,11 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 /// Value types that can flow through the circuit
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Default)]
 #[serde(tag = "type", content = "value")]
 pub enum Value {
     /// Null/None value
+    #[default]
     Null,
     /// Boolean value
     Bool(bool),
@@ -76,12 +77,6 @@ impl Value {
             Value::Object(obj) => Some(obj),
             _ => None,
         }
-    }
-}
-
-impl Default for Value {
-    fn default() -> Self {
-        Value::Null
     }
 }
 

@@ -1,11 +1,17 @@
-use wasm_bindgen::prelude::*;
 use circuit_core::{Engine, Graph};
 use std::sync::{Arc, Mutex};
+use wasm_bindgen::prelude::*;
 
 /// WASM wrapper for the Circuit engine
 #[wasm_bindgen]
 pub struct WasmEngine {
     engine: Arc<Mutex<Engine>>,
+}
+
+impl Default for WasmEngine {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 #[wasm_bindgen]

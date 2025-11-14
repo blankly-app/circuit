@@ -101,9 +101,9 @@ impl Engine {
             }
 
             // Execute the block
-            let outputs = block.execute(context).map_err(|e| {
-                CircuitError::BlockExecution(format!("Node '{}': {}", node_id, e))
-            })?;
+            let outputs = block
+                .execute(context)
+                .map_err(|e| CircuitError::BlockExecution(format!("Node '{}': {}", node_id, e)))?;
 
             node_outputs.insert(node_id.clone(), outputs);
         }
