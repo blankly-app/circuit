@@ -25,21 +25,18 @@ pub fn parse_block(source: &str) -> Result<BlockDef> {
     };
 
     for pair in pairs {
-        match pair.as_rule() {
-            Rule::block_def => {
-                for inner in pair.into_inner() {
-                    match inner.as_rule() {
-                        Rule::qualified_name => {
-                            block_def.name = inner.as_str().to_string();
-                        }
-                        Rule::block_body => {
-                            parse_block_body(inner, &mut block_def)?;
-                        }
-                        _ => {}
+        if pair.as_rule() == Rule::block_def {
+            for inner in pair.into_inner() {
+                match inner.as_rule() {
+                    Rule::qualified_name => {
+                        block_def.name = inner.as_str().to_string();
                     }
+                    Rule::block_body => {
+                        parse_block_body(inner, &mut block_def)?;
+                    }
+                    _ => {}
                 }
             }
-            _ => {}
         }
     }
 
@@ -74,10 +71,12 @@ fn parse_description(pair: pest::iterators::Pair<Rule>) -> Result<String> {
     for inner in pair.into_inner() {
         if inner.as_rule() == Rule::string_literal {
             let s = inner.as_str();
-            return Ok(s[1..s.len()-1].to_string()); // Remove quotes
+            return Ok(s[1..s.len() - 1].to_string()); // Remove quotes
         }
     }
-    Err(LangError::ParseError("Missing description string".to_string()))
+    Err(LangError::ParseError(
+        "Missing description string".to_string(),
+    ))
 }
 
 fn parse_port_def(pair: pest::iterators::Pair<Rule>) -> Result<PortDef> {
@@ -161,7 +160,10 @@ fn parse_value_type(pair: pest::iterators::Pair<Rule>) -> Result<ValueType> {
         "Object" => Ok(ValueType::Object),
         "Bytes" => Ok(ValueType::Bytes),
         "Any" => Ok(ValueType::Any),
-        _ => Err(LangError::ParseError(format!("Unknown type: {}", pair.as_str()))),
+        _ => Err(LangError::ParseError(format!(
+            "Unknown type: {}",
+            pair.as_str()
+        ))),
     }
 }
 
@@ -175,22 +177,24 @@ fn parse_default_stmt(pair: pest::iterators::Pair<Rule>) -> Result<Value> {
 }
 
 fn parse_value(pair: pest::iterators::Pair<Rule>) -> Result<Value> {
-    let inner = pair.into_inner().next()
+    let inner = pair
+        .into_inner()
+        .next()
         .ok_or_else(|| LangError::ParseError("Empty value".to_string()))?;
 
     match inner.as_rule() {
         Rule::null_literal => Ok(Value::Null),
-        Rule::bool_literal => {
-            Ok(Value::Bool(inner.as_str() == "true"))
-        }
+        Rule::bool_literal => Ok(Value::Bool(inner.as_str() == "true")),
         Rule::number_literal => {
-            let num = inner.as_str().parse::<f64>()
+            let num = inner
+                .as_str()
+                .parse::<f64>()
                 .map_err(|e| LangError::ParseError(format!("Invalid number: {}", e)))?;
             Ok(Value::Number(num))
         }
         Rule::string_literal => {
             let s = inner.as_str();
-            Ok(Value::String(s[1..s.len()-1].to_string()))
+            Ok(Value::String(s[1..s.len() - 1].to_string()))
         }
         Rule::array_value => {
             let mut values = Vec::new();
@@ -211,7 +215,10 @@ fn parse_value(pair: pest::iterators::Pair<Rule>) -> Result<Value> {
             }
             Ok(Value::Object(map))
         }
-        _ => Err(LangError::ParseError(format!("Unexpected value type: {:?}", inner.as_rule()))),
+        _ => Err(LangError::ParseError(format!(
+            "Unexpected value type: {:?}",
+            inner.as_rule()
+        ))),
     }
 }
 
@@ -226,7 +233,7 @@ fn parse_object_pair(pair: pest::iterators::Pair<Rule>) -> Result<(String, Value
             }
             Rule::string_literal => {
                 let s = inner.as_str();
-                key = s[1..s.len()-1].to_string();
+                key = s[1..s.len() - 1].to_string();
             }
             Rule::value => {
                 value = Some(parse_value(inner)?);
@@ -252,7 +259,9 @@ fn parse_execute_block(pair: pest::iterators::Pair<Rule>) -> Result<ExecuteBlock
 }
 
 fn parse_statement(pair: pest::iterators::Pair<Rule>) -> Result<Statement> {
-    let inner = pair.into_inner().next()
+    let inner = pair
+        .into_inner()
+        .next()
         .ok_or_else(|| LangError::ParseError("Empty statement".to_string()))?;
 
     match inner.as_rule() {
@@ -272,13 +281,18 @@ fn parse_statement(pair: pest::iterators::Pair<Rule>) -> Result<Statement> {
                 }
             }
 
-            let value = value.ok_or_else(|| LangError::ParseError("Missing assignment value".to_string()))?;
+            let value = value
+                .ok_or_else(|| LangError::ParseError("Missing assignment value".to_string()))?;
             Ok(Statement::Assignment { target, value })
         }
         Rule::return_stmt => {
-            let expr = inner.into_inner().next()
+            let expr = inner
+                .into_inner()
+                .next()
                 .ok_or_else(|| LangError::ParseError("Missing return value".to_string()))?;
-            Ok(Statement::Return { value: parse_expression(expr)? })
+            Ok(Statement::Return {
+                value: parse_expression(expr)?,
+            })
         }
         Rule::if_stmt => {
             let mut condition = None;
@@ -304,15 +318,25 @@ fn parse_statement(pair: pest::iterators::Pair<Rule>) -> Result<Statement> {
                 }
             }
 
-            let condition = condition.ok_or_else(|| LangError::ParseError("Missing if condition".to_string()))?;
-            Ok(Statement::If { condition, then_block, else_block })
+            let condition = condition
+                .ok_or_else(|| LangError::ParseError("Missing if condition".to_string()))?;
+            Ok(Statement::If {
+                condition,
+                then_block,
+                else_block,
+            })
         }
-        _ => Err(LangError::ParseError(format!("Unexpected statement: {:?}", inner.as_rule()))),
+        _ => Err(LangError::ParseError(format!(
+            "Unexpected statement: {:?}",
+            inner.as_rule()
+        ))),
     }
 }
 
 fn parse_expression(pair: pest::iterators::Pair<Rule>) -> Result<Expression> {
-    let inner = pair.into_inner().next()
+    let inner = pair
+        .into_inner()
+        .next()
         .ok_or_else(|| LangError::ParseError("Empty expression".to_string()))?;
 
     match inner.as_rule() {
@@ -357,7 +381,8 @@ fn parse_expression(pair: pest::iterators::Pair<Rule>) -> Result<Expression> {
                 }
             }
 
-            let target = target.ok_or_else(|| LangError::ParseError("Missing call target".to_string()))?;
+            let target =
+                target.ok_or_else(|| LangError::ParseError("Missing call target".to_string()))?;
             Ok(Expression::Call {
                 target: Box::new(target),
                 args,
@@ -365,19 +390,27 @@ fn parse_expression(pair: pest::iterators::Pair<Rule>) -> Result<Expression> {
         }
         Rule::member_expr => parse_member_expr(inner),
         Rule::primary_expr => parse_primary_expr(inner),
-        _ => Err(LangError::ParseError(format!("Unexpected expression: {:?}", inner.as_rule()))),
+        _ => Err(LangError::ParseError(format!(
+            "Unexpected expression: {:?}",
+            inner.as_rule()
+        ))),
     }
 }
 
 fn parse_primary_expr(pair: pest::iterators::Pair<Rule>) -> Result<Expression> {
-    let inner = pair.into_inner().next()
+    let inner = pair
+        .into_inner()
+        .next()
         .ok_or_else(|| LangError::ParseError("Empty primary expression".to_string()))?;
 
     match inner.as_rule() {
         Rule::value => Ok(Expression::Value(parse_value(inner)?)),
         Rule::identifier => Ok(Expression::Identifier(inner.as_str().to_string())),
         Rule::expression => parse_expression(inner),
-        _ => Err(LangError::ParseError(format!("Unexpected primary expr: {:?}", inner.as_rule()))),
+        _ => Err(LangError::ParseError(format!(
+            "Unexpected primary expr: {:?}",
+            inner.as_rule()
+        ))),
     }
 }
 
@@ -390,8 +423,12 @@ fn parse_member_expr(pair: pest::iterators::Pair<Rule>) -> Result<Expression> {
 
     let mut expr = match items[0].as_rule() {
         Rule::identifier => Expression::Identifier(items[0].as_str().to_string()),
-        Rule::call_expr => parse_expression(items[0].clone().into())?,
-        _ => return Err(LangError::ParseError("Invalid member expression base".to_string())),
+        Rule::call_expr => parse_expression(items[0].clone())?,
+        _ => {
+            return Err(LangError::ParseError(
+                "Invalid member expression base".to_string(),
+            ))
+        }
     };
 
     for item in items.iter().skip(1) {
@@ -421,7 +458,10 @@ fn parse_binary_op(pair: pest::iterators::Pair<Rule>) -> Result<BinaryOp> {
         ">=" => Ok(BinaryOp::Ge),
         "&&" => Ok(BinaryOp::And),
         "||" => Ok(BinaryOp::Or),
-        _ => Err(LangError::ParseError(format!("Unknown binary op: {}", pair.as_str()))),
+        _ => Err(LangError::ParseError(format!(
+            "Unknown binary op: {}",
+            pair.as_str()
+        ))),
     }
 }
 
@@ -429,7 +469,10 @@ fn parse_unary_op(pair: pest::iterators::Pair<Rule>) -> Result<UnaryOp> {
     match pair.as_str() {
         "!" => Ok(UnaryOp::Not),
         "-" => Ok(UnaryOp::Neg),
-        _ => Err(LangError::ParseError(format!("Unknown unary op: {}", pair.as_str()))),
+        _ => Err(LangError::ParseError(format!(
+            "Unknown unary op: {}",
+            pair.as_str()
+        ))),
     }
 }
 
@@ -447,21 +490,18 @@ pub fn parse_flow(source: &str) -> Result<FlowDef> {
     };
 
     for pair in pairs {
-        match pair.as_rule() {
-            Rule::flow_def => {
-                for inner in pair.into_inner() {
-                    match inner.as_rule() {
-                        Rule::identifier => {
-                            flow_def.name = inner.as_str().to_string();
-                        }
-                        Rule::flow_body => {
-                            parse_flow_body(inner, &mut flow_def)?;
-                        }
-                        _ => {}
+        if pair.as_rule() == Rule::flow_def {
+            for inner in pair.into_inner() {
+                match inner.as_rule() {
+                    Rule::identifier => {
+                        flow_def.name = inner.as_str().to_string();
                     }
+                    Rule::flow_body => {
+                        parse_flow_body(inner, &mut flow_def)?;
+                    }
+                    _ => {}
                 }
             }
-            _ => {}
         }
     }
 
@@ -556,7 +596,9 @@ fn parse_position(pair: pest::iterators::Pair<Rule>) -> Result<(f64, f64)> {
 
     for inner in pair.into_inner() {
         if inner.as_rule() == Rule::number_literal {
-            let num = inner.as_str().parse::<f64>()
+            let num = inner
+                .as_str()
+                .parse::<f64>()
                 .map_err(|e| LangError::ParseError(format!("Invalid position number: {}", e)))?;
             numbers.push(num);
         }
@@ -565,7 +607,9 @@ fn parse_position(pair: pest::iterators::Pair<Rule>) -> Result<(f64, f64)> {
     if numbers.len() == 2 {
         Ok((numbers[0], numbers[1]))
     } else {
-        Err(LangError::ParseError("Position requires exactly 2 numbers".to_string()))
+        Err(LangError::ParseError(
+            "Position requires exactly 2 numbers".to_string(),
+        ))
     }
 }
 
@@ -584,7 +628,9 @@ fn parse_connection(pair: pest::iterators::Pair<Rule>) -> Result<ConnectionDef> 
             to: port_refs[1].clone(),
         })
     } else {
-        Err(LangError::ParseError("Connection requires exactly 2 port refs".to_string()))
+        Err(LangError::ParseError(
+            "Connection requires exactly 2 port refs".to_string(),
+        ))
     }
 }
 
@@ -612,7 +658,9 @@ fn parse_port_ref(pair: pest::iterators::Pair<Rule>) -> Result<PortRef> {
             port: parts[1].clone(),
         })
     } else {
-        Err(LangError::ParseError("Port ref must be node.port".to_string()))
+        Err(LangError::ParseError(
+            "Port ref must be node.port".to_string(),
+        ))
     }
 }
 
@@ -628,7 +676,9 @@ pub fn parse_file(source: &str) -> Result<FileType> {
         return Ok(FileType::Flow(flow));
     }
 
-    Err(LangError::ParseError("Could not parse as block or flow".to_string()))
+    Err(LangError::ParseError(
+        "Could not parse as block or flow".to_string(),
+    ))
 }
 
 #[derive(Debug, Clone, PartialEq)]

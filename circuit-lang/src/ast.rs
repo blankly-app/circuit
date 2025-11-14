@@ -41,9 +41,18 @@ pub struct ExecuteBlock {
 /// Statement in execution block
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum Statement {
-    Assignment { target: String, value: Expression },
-    Return { value: Expression },
-    If { condition: Expression, then_block: Vec<Statement>, else_block: Option<Vec<Statement>> },
+    Assignment {
+        target: String,
+        value: Expression,
+    },
+    Return {
+        value: Expression,
+    },
+    If {
+        condition: Expression,
+        then_block: Vec<Statement>,
+        else_block: Option<Vec<Statement>>,
+    },
 }
 
 /// Expression
@@ -51,24 +60,48 @@ pub enum Statement {
 pub enum Expression {
     Value(Value),
     Identifier(String),
-    Binary { left: Box<Expression>, op: BinaryOp, right: Box<Expression> },
-    Unary { op: UnaryOp, operand: Box<Expression> },
-    Call { target: Box<Expression>, args: Vec<Expression> },
-    Member { object: Box<Expression>, member: String },
+    Binary {
+        left: Box<Expression>,
+        op: BinaryOp,
+        right: Box<Expression>,
+    },
+    Unary {
+        op: UnaryOp,
+        operand: Box<Expression>,
+    },
+    Call {
+        target: Box<Expression>,
+        args: Vec<Expression>,
+    },
+    Member {
+        object: Box<Expression>,
+        member: String,
+    },
 }
 
 /// Binary operators
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum BinaryOp {
-    Add, Sub, Mul, Div, Mod,
-    Eq, Ne, Lt, Gt, Le, Ge,
-    And, Or,
+    Add,
+    Sub,
+    Mul,
+    Div,
+    Mod,
+    Eq,
+    Ne,
+    Lt,
+    Gt,
+    Le,
+    Ge,
+    And,
+    Or,
 }
 
 /// Unary operators
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum UnaryOp {
-    Not, Neg,
+    Not,
+    Neg,
 }
 
 /// Value types

@@ -28,7 +28,11 @@ fn test_load_all_block_examples() {
             .unwrap_or_else(|e| panic!("Failed to parse {}: {}", path.display(), e));
 
         // Verify basic structure
-        assert!(!block.name.is_empty(), "Block name should not be empty in {}", file);
+        assert!(
+            !block.name.is_empty(),
+            "Block name should not be empty in {}",
+            file
+        );
         println!("✓ Loaded block: {} from {}", block.name, file);
     }
 }
@@ -50,9 +54,18 @@ fn test_load_all_flow_examples() {
             .unwrap_or_else(|e| panic!("Failed to parse {}: {}", path.display(), e));
 
         // Verify basic structure
-        assert!(!flow.name.is_empty(), "Flow name should not be empty in {}", file);
+        assert!(
+            !flow.name.is_empty(),
+            "Flow name should not be empty in {}",
+            file
+        );
         assert!(!flow.nodes.is_empty(), "Flow should have nodes in {}", file);
-        println!("✓ Loaded flow: {} ({} nodes) from {}", flow.name, flow.nodes.len(), file);
+        println!(
+            "✓ Loaded flow: {} ({} nodes) from {}",
+            flow.name,
+            flow.nodes.len(),
+            file
+        );
     }
 }
 
@@ -133,7 +146,11 @@ fn test_block_with_config() {
     assert_eq!(block.inputs.len(), 2);
 
     // Check for default value
-    let exponent_input = block.inputs.iter().find(|i| i.name == "exponent").expect("exponent input not found");
+    let exponent_input = block
+        .inputs
+        .iter()
+        .find(|i| i.name == "exponent")
+        .expect("exponent input not found");
     assert!(exponent_input.default.is_some());
 }
 

@@ -156,7 +156,10 @@ fn test_parse_values() {
     assert_eq!(config.get("null_val"), Some(&Value::Null));
     assert_eq!(config.get("bool_val"), Some(&Value::Bool(true)));
     assert_eq!(config.get("num_val"), Some(&Value::Number(42.5)));
-    assert_eq!(config.get("str_val"), Some(&Value::String("hello".to_string())));
+    assert_eq!(
+        config.get("str_val"),
+        Some(&Value::String("hello".to_string()))
+    );
 }
 
 #[test]

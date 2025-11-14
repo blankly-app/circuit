@@ -8,19 +8,24 @@ use std::collections::HashMap;
 
 /// Convert a FlowDef to a Graph
 pub fn flow_to_graph(flow: &FlowDef) -> Result<Graph> {
-    let mut graph = Graph::new(flow.name.clone(), flow.description.clone().unwrap_or_default());
+    let mut graph = Graph::new(
+        flow.name.clone(),
+        flow.description.clone().unwrap_or_default(),
+    );
 
     // Add all nodes
     for node_def in &flow.nodes {
         let node = node_def_to_node(node_def)?;
-        graph.add_node(node)
+        graph
+            .add_node(node)
             .map_err(|e| LangError::ValidationError(format!("Failed to add node: {}", e)))?;
     }
 
     // Add all connections
     for conn_def in &flow.connections {
         let connection = connection_def_to_connection(conn_def);
-        graph.add_connection(connection)
+        graph
+            .add_connection(connection)
             .map_err(|e| LangError::ValidationError(format!("Failed to add connection: {}", e)))?;
     }
 
@@ -147,7 +152,10 @@ mod tests {
 
         let node = &graph.nodes.get("n1").expect("Node not found");
         assert_eq!(node.config.get("num"), Some(&CoreValue::Float(42.5)));
-        assert_eq!(node.config.get("str"), Some(&CoreValue::String("hello".to_string())));
+        assert_eq!(
+            node.config.get("str"),
+            Some(&CoreValue::String("hello".to_string()))
+        );
         assert_eq!(node.config.get("bool"), Some(&CoreValue::Bool(true)));
     }
 }

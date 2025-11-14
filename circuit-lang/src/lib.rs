@@ -4,12 +4,12 @@
 //! declarative languages for defining computational blocks and flow graphs.
 
 mod ast;
-mod parser;
 mod converter;
+mod parser;
 
 pub use ast::*;
-pub use parser::*;
 pub use converter::*;
+pub use parser::*;
 
 use thiserror::Error;
 

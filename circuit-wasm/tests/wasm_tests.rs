@@ -88,7 +88,11 @@ fn test_execute_empty_graph() {
 
     engine.load_graph(graph_json).expect("Failed to load graph");
     let result = engine.execute_graph("empty_graph");
-    assert!(result.is_ok(), "Failed to execute empty graph: {:?}", result);
+    assert!(
+        result.is_ok(),
+        "Failed to execute empty graph: {:?}",
+        result
+    );
 
     // Empty graph should return empty results
     let results_json = result.unwrap();
@@ -115,7 +119,9 @@ fn test_multiple_engine_instances() {
         "connections": []
     }"#;
 
-    engine1.load_graph(graph_json).expect("Failed to load in engine1");
+    engine1
+        .load_graph(graph_json)
+        .expect("Failed to load in engine1");
 
     // engine2 should not have the graph loaded in engine1
     assert_eq!(engine1.list_graphs().len(), 1);
