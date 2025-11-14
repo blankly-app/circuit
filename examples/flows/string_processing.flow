@@ -1,0 +1,43 @@
+flow string_processing {
+    description "Demonstrates string concatenation and processing"
+
+    node hello: core.constant {
+        value = "Hello"
+        position(100, 100)
+    }
+
+    node world: core.constant {
+        value = "World"
+        position(100, 200)
+    }
+
+    node space: core.constant {
+        value = " "
+        position(100, 150)
+    }
+
+    node concat1: string.concat {
+        position(300, 125)
+    }
+
+    node concat2: string.concat {
+        position(500, 150)
+    }
+
+    node debug: core.debug {
+        position(700, 150)
+    }
+
+    // Build "Hello "
+    connect hello.value -> concat1.a
+    connect space.value -> concat1.b
+
+    // Build "Hello World"
+    connect concat1.result -> concat2.a
+    connect world.value -> concat2.b
+
+    // Debug output
+    connect concat2.result -> debug.input
+
+    output debug.output
+}

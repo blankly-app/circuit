@@ -1,0 +1,42 @@
+flow calculator {
+    description "Simple calculator: (5 + 3) * 2 = 16"
+
+    // Constants
+    node const5: core.constant {
+        value = 5
+        position(100, 100)
+    }
+
+    node const3: core.constant {
+        value = 3
+        position(100, 200)
+    }
+
+    node const2: core.constant {
+        value = 2
+        position(400, 150)
+    }
+
+    // Operations
+    node add: math.add {
+        position(250, 150)
+    }
+
+    node multiply: math.multiply {
+        position(550, 150)
+    }
+
+    node debug: core.debug {
+        position(700, 150)
+    }
+
+    // Connections
+    connect const5.value -> add.a
+    connect const3.value -> add.b
+    connect add.result -> multiply.a
+    connect const2.value -> multiply.b
+    connect multiply.result -> debug.input
+
+    // Output
+    output debug.output
+}

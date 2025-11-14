@@ -1,0 +1,29 @@
+block logic.compare {
+    description "Compares two numbers and returns the relationship"
+
+    input a: Number {
+        description "First number"
+    }
+
+    input b: Number {
+        description "Second number"
+    }
+
+    output equal: Bool {
+        description "True if a == b"
+    }
+
+    output greater: Bool {
+        description "True if a > b"
+    }
+
+    output less: Bool {
+        description "True if a < b"
+    }
+
+    execute {
+        equal = a == b
+        greater = a > b
+        less = a < b
+    }
+}

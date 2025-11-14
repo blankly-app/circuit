@@ -1,0 +1,15 @@
+block math.square {
+    description "Squares a number (x²)"
+
+    input x: Number {
+        description "The number to square"
+    }
+
+    output result: Number {
+        description "The squared result (x * x)"
+    }
+
+    execute {
+        result = x * x
+    }
+}

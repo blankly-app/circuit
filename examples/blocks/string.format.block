@@ -1,0 +1,29 @@
+block string.format {
+    description "Formats a string with a template"
+
+    input template: String {
+        description "The template string"
+    }
+
+    input value: Any {
+        description "The value to insert"
+    }
+
+    config prefix: String {
+        description "Optional prefix"
+        default = ""
+    }
+
+    config suffix: String {
+        description "Optional suffix"
+        default = ""
+    }
+
+    output result: String {
+        description "The formatted string"
+    }
+
+    execute {
+        result = prefix + template + suffix
+    }
+}
