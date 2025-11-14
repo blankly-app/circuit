@@ -106,7 +106,7 @@ fn test_list_blocks_initially_empty() {
 #[wasm_bindgen_test]
 fn test_multiple_engine_instances() {
     let mut engine1 = WasmEngine::new();
-    let mut engine2 = WasmEngine::new();
+    let engine2 = WasmEngine::new();
 
     let graph_json = r#"{
         "id": "test",
