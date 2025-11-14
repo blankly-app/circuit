@@ -1,0 +1,21 @@
+[package]
+name = "circuit-wasm"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+circuit-core = { path = "../circuit-core" }
+wasm-bindgen = "0.2"
+serde.workspace = true
+serde_json.workspace = true
+js-sys = "0.3"
+wasm-bindgen-futures = "0.4"
+
+[dev-dependencies]
+wasm-bindgen-test = "0.3"

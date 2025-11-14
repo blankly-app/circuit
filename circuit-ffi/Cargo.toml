@@ -1,0 +1,16 @@
+[package]
+name = "circuit-ffi"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[lib]
+crate-type = ["staticlib", "cdylib"]
+
+[dependencies]
+circuit-core = { path = "../circuit-core" }
+serde.workspace = true
+serde_json.workspace = true
+lazy_static = "1.4"
