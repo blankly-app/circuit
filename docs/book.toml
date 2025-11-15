@@ -1,0 +1,36 @@
+[book]
+authors = ["Circuit Contributors"]
+language = "en"
+multilingual = false
+src = "src"
+title = "Circuit Documentation"
+description = "A node-based runtime engine for building apps with blocks written in Rust"
+
+[preprocessor.links]
+
+[output.html]
+default-theme = "rust"
+preferred-dark-theme = "navy"
+git-repository-url = "https://github.com/blankly-app/circuit"
+edit-url-template = "https://github.com/blankly-app/circuit/edit/main/docs/{path}"
+additional-css = ["theme/custom.css"]
+additional-js = ["theme/custom.js"]
+
+[output.html.fold]
+enable = true
+level = 1
+
+[output.html.playground]
+editable = true
+copyable = true
+
+[output.html.search]
+enable = true
+limit-results = 30
+teaser-word-count = 30
+use-boolean-and = true
+boost-title = 2
+boost-hierarchy = 1
+boost-paragraph = 1
+expand = true
+heading-split-level = 3

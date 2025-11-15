@@ -1,0 +1,183 @@
+/* Custom styling for Circuit Documentation */
+
+:root {
+    --circuit-primary: #4299e1;
+    --circuit-secondary: #805ad5;
+    --circuit-accent: #48bb78;
+}
+
+/* Header customization */
+.sidebar .sidebar-scrollbox {
+    padding-top: 20px;
+}
+
+/* Add logo space */
+.sidebar::before {
+    content: "⚡ Circuit";
+    display: block;
+    font-size: 24px;
+    font-weight: bold;
+    padding: 20px;
+    text-align: center;
+    color: var(--circuit-primary);
+    border-bottom: 2px solid var(--sidebar-bg);
+}
+
+/* Code blocks */
+.hljs {
+    border-radius: 6px;
+}
+
+pre {
+    border-left: 3px solid var(--circuit-primary);
+}
+
+/* Links */
+a {
+    color: var(--circuit-primary);
+}
+
+a:hover {
+    color: var(--circuit-secondary);
+}
+
+/* Headers */
+h1 {
+    border-bottom: 3px solid var(--circuit-primary);
+    padding-bottom: 10px;
+}
+
+h2 {
+    border-bottom: 2px solid var(--sidebar-bg);
+    padding-bottom: 8px;
+    margin-top: 30px;
+}
+
+/* Tables */
+table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 20px 0;
+}
+
+table thead {
+    background-color: var(--circuit-primary);
+    color: white;
+}
+
+table th,
+table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--sidebar-bg);
+}
+
+table tbody tr:hover {
+    background-color: var(--sidebar-bg);
+}
+
+/* Blockquotes / Notes */
+blockquote {
+    border-left: 4px solid var(--circuit-accent);
+    background-color: var(--quote-bg);
+    padding: 10px 20px;
+    margin: 20px 0;
+    border-radius: 4px;
+}
+
+blockquote p:first-child {
+    margin-top: 0;
+}
+
+blockquote p:last-child {
+    margin-bottom: 0;
+}
+
+/* Code blocks with language labels */
+.hljs::before {
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 2px 8px;
+    font-size: 12px;
+    color: #888;
+}
+
+/* Sidebar active chapter */
+.sidebar .active {
+    background-color: var(--circuit-primary) !important;
+    color: white !important;
+}
+
+/* Search bar */
+#searchbar {
+    border: 2px solid var(--circuit-primary);
+    border-radius: 4px;
+}
+
+/* Buttons */
+.button {
+    background-color: var(--circuit-primary);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 4px;
+    text-decoration: none;
+    display: inline-block;
+    margin: 5px;
+}
+
+.button:hover {
+    background-color: var(--circuit-secondary);
+}
+
+/* Navigation buttons */
+.nav-chapters {
+    border-top: 2px solid var(--sidebar-bg);
+    padding-top: 20px;
+}
+
+/* Mobile improvements */
+@media (max-width: 768px) {
+    .sidebar::before {
+        font-size: 20px;
+        padding: 15px;
+    }
+}
+
+/* Print styles */
+@media print {
+    .sidebar,
+    .nav-chapters,
+    #menu-bar {
+        display: none !important;
+    }
+
+    .page {
+        margin: 0 !important;
+    }
+}
+
+/* Custom classes for documentation */
+.warning {
+    border-left: 4px solid #f56565;
+    background-color: rgba(245, 101, 101, 0.1);
+    padding: 10px 20px;
+    margin: 20px 0;
+    border-radius: 4px;
+}
+
+.info {
+    border-left: 4px solid var(--circuit-primary);
+    background-color: rgba(66, 153, 225, 0.1);
+    padding: 10px 20px;
+    margin: 20px 0;
+    border-radius: 4px;
+}
+
+.success {
+    border-left: 4px solid var(--circuit-accent);
+    background-color: rgba(72, 187, 120, 0.1);
+    padding: 10px 20px;
+    margin: 20px 0;
+    border-radius: 4px;
+}
