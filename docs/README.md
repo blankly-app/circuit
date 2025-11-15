@@ -202,14 +202,47 @@ Edit `book.toml` to configure:
 
 The documentation can be deployed to:
 
-- **GitHub Pages**: Push the `book/` directory
+- **GitHub Pages**: Automated via GitHub Actions (recommended)
 - **Netlify**: Point to `docs/book/`
 - **Any static host**: Serve the `book/` directory
 
-### GitHub Pages Example
+### GitHub Pages (Automated)
+
+The repository includes a GitHub Actions workflow (`.github/workflows/deploy-docs.yml`) that automatically builds and deploys documentation to GitHub Pages on every push to `main`.
+
+#### Setup GitHub Pages
+
+1. Go to your repository settings on GitHub
+2. Navigate to **Settings** → **Pages**
+3. Under **Source**, select **GitHub Actions**
+4. The documentation will be automatically deployed on the next push to `main`
+5. Access your docs at: `https://<username>.github.io/<repo-name>/`
+
+#### Manual Trigger
+
+You can also manually trigger the deployment:
+
+1. Go to **Actions** tab on GitHub
+2. Select **Deploy Documentation** workflow
+3. Click **Run workflow**
+
+#### Local Preview Before Deploy
+
+Always preview locally before pushing:
+
+```bash
+cd docs
+./build.sh
+mdbook serve --open
+```
+
+### GitHub Pages (Manual)
+
+If you prefer manual deployment:
 
 ```bash
 # Build the docs
+cd docs
 ./build.sh
 
 # Copy to gh-pages branch
@@ -219,6 +252,19 @@ git add .
 git commit -m "Update documentation"
 git push origin gh-pages
 ```
+
+### Other Hosting Options
+
+**Netlify:**
+- Connect your repository
+- Set build command: `cd docs && ./build.sh`
+- Set publish directory: `docs/book`
+
+**Vercel:**
+- Import your repository
+- Framework: Other
+- Build command: `cd docs && ./build.sh`
+- Output directory: `docs/book`
 
 ## Maintenance
 

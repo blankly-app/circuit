@@ -305,11 +305,32 @@ All tests are run automatically via GitHub Actions CI/CD on every commit.
 
 ## 📚 Documentation
 
-- [Language Specification](docs/LANGUAGE.md) - Complete guide to `.block` and `.flow` syntax
+**[📖 Read the full documentation →](https://blankly-app.github.io/circuit/)**
+
+The comprehensive documentation website includes:
+
+- **Getting Started** - Quick start, installation, your first flow
+- **User Guide** - Blocks, flows, declarative language, custom blocks
+- **Platform Integration** - Swift, Kotlin, React, WebAssembly guides
+- **Advanced Topics** - Building, FFI, performance, testing
+- **API Reference** - Complete Rust API documentation
+- **Examples** - Practical tutorials and walkthroughs
+
+### Quick Links
+
+- [Language Specification](docs/LANGUAGE.md) - `.block` and `.flow` syntax
 - [API Reference](docs/API.md) - Core API documentation
 - [Swift/iOS Integration](docs/SWIFT.md)
 - [Kotlin/Android Integration](docs/KOTLIN.md)
 - [React/Web Integration](docs/REACT.md)
+
+### Building Documentation Locally
+
+```bash
+cd docs
+./build.sh
+mdbook serve --open
+```
 
 ## 🔧 Built-in Blocks
 
@@ -331,6 +352,7 @@ Circuit includes several built-in blocks:
 - [x] Declarative language for blocks and flows
 - [x] Comprehensive testing infrastructure
 - [x] Parser for `.block` and `.flow` files
+- [x] Documentation website with guides and API reference
 - [ ] More built-in blocks (subtract, divide, modulo, etc.)
 - [ ] Visual graph editor (web-based)
 - [ ] Block execution interpreter (for `.block` execute blocks)
