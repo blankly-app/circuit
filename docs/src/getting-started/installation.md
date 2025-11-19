@@ -23,6 +23,31 @@ rustc --version
 cargo --version
 ```
 
+### Using mise (optional/recommended)
+
+If you prefer to use `mise` for developer tool/version management, you can use
+the repo-provided `mise.toml` and the `rust-toolchain` file to automatically
+install and pin the correct Rust version and components.
+
+```bash
+# Install mise (only if you don't have it)
+curl https://mise.run | sh
+
+# Activate mise in your shell (zsh example)
+eval "$(~/.local/bin/mise activate zsh)"
+
+# From the repository root, activate the Rust toolchain and install configured tools
+cd circuit
+mise use rust@1.90.0
+mise install
+
+# Verify cargo/rust version (runs inside mise environment)
+mise x -- cargo --version
+```
+
+Note: `.rust-toolchain.toml` is also included and will ensure `rustup` uses the
+right channel and components if you're using `rustup` directly.
+
 ### Clone Circuit
 
 ```bash

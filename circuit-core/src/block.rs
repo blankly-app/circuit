@@ -33,6 +33,7 @@ pub struct PortDefinition {
 }
 
 /// Context provided to a block during execution
+#[derive(Debug, Clone)]
 pub struct BlockContext {
     /// Input values from connected nodes
     pub inputs: HashMap<String, Value>,

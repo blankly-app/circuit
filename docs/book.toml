@@ -1,7 +1,6 @@
 [book]
 authors = ["Circuit Contributors"]
 language = "en"
-multilingual = false
 src = "src"
 title = "Circuit Documentation"
 description = "A node-based runtime engine for building apps with blocks written in Rust"

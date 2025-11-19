@@ -1,11 +1,3 @@
-//! Example blocks showcasing how to create custom blocks for the Circuit engine
-//!
-//! This module demonstrates various types of blocks:
-//! - Math operations (Add, Multiply, etc.)
-//! - String operations (Concat, Format, etc.)
-//! - Control flow (If, Switch, etc.)
-//! - Data transformation (Map, Filter, etc.)
-
 use crate::block::{Block, BlockContext, BlockMetadata, PortDefinition};
 use crate::error::{CircuitError, Result};
 use crate::value::Value;
@@ -64,6 +56,59 @@ impl Block for AddBlock {
     }
 }
 
+/// Subtract two numbers (a - b)
+pub struct SubtractBlock;
+
+impl Block for SubtractBlock {
+    fn metadata(&self) -> BlockMetadata {
+        BlockMetadata {
+            id: "math.subtract".to_string(),
+            name: "Subtract".to_string(),
+            description: "Subtract two numbers (a - b)".to_string(),
+            inputs: vec![
+                PortDefinition {
+                    id: "a".to_string(),
+                    name: "A".to_string(),
+                    data_type: "number".to_string(),
+                    required: true,
+                },
+                PortDefinition {
+                    id: "b".to_string(),
+                    name: "B".to_string(),
+                    data_type: "number".to_string(),
+                    required: true,
+                },
+            ],
+            outputs: vec![PortDefinition {
+                id: "result".to_string(),
+                name: "Result".to_string(),
+                data_type: "number".to_string(),
+                required: true,
+            }],
+            config_schema: HashMap::new(),
+        }
+    }
+
+    fn execute(&self, context: BlockContext) -> Result<HashMap<String, Value>> {
+        let a = context
+            .get_input("a")
+            .and_then(|v| v.as_float())
+            .ok_or_else(|| {
+                CircuitError::InvalidInput("Missing or invalid input 'a'".to_string())
+            })?;
+        let b = context
+            .get_input("b")
+            .and_then(|v| v.as_float())
+            .ok_or_else(|| {
+                CircuitError::InvalidInput("Missing or invalid input 'b'".to_string())
+            })?;
+
+        let mut outputs = HashMap::new();
+        outputs.insert("result".to_string(), Value::Float(a - b));
+        Ok(outputs)
+    }
+}
+
 /// Multiply two numbers together
 pub struct MultiplyBlock;
 
@@ -117,69 +162,33 @@ impl Block for MultiplyBlock {
     }
 }
 
-/// Output a constant value
-pub struct ConstantBlock;
+/// Divide two numbers (a / b)
+pub struct DivideBlock;
 
-impl Block for ConstantBlock {
+impl Block for DivideBlock {
     fn metadata(&self) -> BlockMetadata {
         BlockMetadata {
-            id: "core.constant".to_string(),
-            name: "Constant".to_string(),
-            description: "Outputs a constant value".to_string(),
-            inputs: vec![],
-            outputs: vec![PortDefinition {
-                id: "value".to_string(),
-                name: "Value".to_string(),
-                data_type: "any".to_string(),
-                required: true,
-            }],
-            config_schema: {
-                let mut schema = HashMap::new();
-                schema.insert("value".to_string(), "any".to_string());
-                schema
-            },
-        }
-    }
-
-    fn execute(&self, context: BlockContext) -> Result<HashMap<String, Value>> {
-        let value = context
-            .get_config("value")
-            .ok_or_else(|| CircuitError::InvalidInput("Missing config 'value'".to_string()))?
-            .clone();
-
-        let mut outputs = HashMap::new();
-        outputs.insert("value".to_string(), value);
-        Ok(outputs)
-    }
-}
-
-/// Concatenate two strings
-pub struct ConcatBlock;
-
-impl Block for ConcatBlock {
-    fn metadata(&self) -> BlockMetadata {
-        BlockMetadata {
-            id: "string.concat".to_string(),
-            name: "Concatenate".to_string(),
-            description: "Concatenate two strings".to_string(),
+            id: "math.divide".to_string(),
+            name: "Divide".to_string(),
+            description: "Divide two numbers (a / b)".to_string(),
             inputs: vec![
                 PortDefinition {
                     id: "a".to_string(),
-                    name: "String A".to_string(),
-                    data_type: "string".to_string(),
+                    name: "A".to_string(),
+                    data_type: "number".to_string(),
                     required: true,
                 },
                 PortDefinition {
                     id: "b".to_string(),
-                    name: "String B".to_string(),
-                    data_type: "string".to_string(),
+                    name: "B".to_string(),
+                    data_type: "number".to_string(),
                     required: true,
                 },
             ],
             outputs: vec![PortDefinition {
                 id: "result".to_string(),
                 name: "Result".to_string(),
-                data_type: "string".to_string(),
+                data_type: "number".to_string(),
                 required: true,
             }],
             config_schema: HashMap::new(),
@@ -189,42 +198,54 @@ impl Block for ConcatBlock {
     fn execute(&self, context: BlockContext) -> Result<HashMap<String, Value>> {
         let a = context
             .get_input("a")
-            .and_then(|v| v.as_str())
+            .and_then(|v| v.as_float())
             .ok_or_else(|| {
                 CircuitError::InvalidInput("Missing or invalid input 'a'".to_string())
             })?;
         let b = context
             .get_input("b")
-            .and_then(|v| v.as_str())
+            .and_then(|v| v.as_float())
             .ok_or_else(|| {
                 CircuitError::InvalidInput("Missing or invalid input 'b'".to_string())
             })?;
 
+        if b == 0.0 {
+            return Err(CircuitError::BlockExecution("Division by zero".to_string()));
+        }
+
         let mut outputs = HashMap::new();
-        outputs.insert("result".to_string(), Value::String(format!("{}{}", a, b)));
+        outputs.insert("result".to_string(), Value::Float(a / b));
         Ok(outputs)
     }
 }
 
-/// Debug block that prints values
-pub struct DebugBlock;
+/// Modulo of two numbers (a % b)
+pub struct ModuloBlock;
 
-impl Block for DebugBlock {
+impl Block for ModuloBlock {
     fn metadata(&self) -> BlockMetadata {
         BlockMetadata {
-            id: "core.debug".to_string(),
-            name: "Debug".to_string(),
-            description: "Print debug information".to_string(),
-            inputs: vec![PortDefinition {
-                id: "value".to_string(),
-                name: "Value".to_string(),
-                data_type: "any".to_string(),
-                required: true,
-            }],
+            id: "math.modulo".to_string(),
+            name: "Modulo".to_string(),
+            description: "Modulo of two numbers (a % b)".to_string(),
+            inputs: vec![
+                PortDefinition {
+                    id: "a".to_string(),
+                    name: "A".to_string(),
+                    data_type: "number".to_string(),
+                    required: true,
+                },
+                PortDefinition {
+                    id: "b".to_string(),
+                    name: "B".to_string(),
+                    data_type: "number".to_string(),
+                    required: true,
+                },
+            ],
             outputs: vec![PortDefinition {
-                id: "value".to_string(),
-                name: "Value".to_string(),
-                data_type: "any".to_string(),
+                id: "result".to_string(),
+                name: "Result".to_string(),
+                data_type: "number".to_string(),
                 required: true,
             }],
             config_schema: HashMap::new(),
@@ -232,15 +253,25 @@ impl Block for DebugBlock {
     }
 
     fn execute(&self, context: BlockContext) -> Result<HashMap<String, Value>> {
-        let value = context
-            .get_input("value")
-            .ok_or_else(|| CircuitError::InvalidInput("Missing input 'value'".to_string()))?
-            .clone();
+        let a = context
+            .get_input("a")
+            .and_then(|v| v.as_float())
+            .ok_or_else(|| {
+                CircuitError::InvalidInput("Missing or invalid input 'a'".to_string())
+            })?;
+        let b = context
+            .get_input("b")
+            .and_then(|v| v.as_float())
+            .ok_or_else(|| {
+                CircuitError::InvalidInput("Missing or invalid input 'b'".to_string())
+            })?;
 
-        println!("DEBUG: {:?}", value);
+        if b == 0.0 {
+            return Err(CircuitError::BlockExecution("Modulo by zero".to_string()));
+        }
 
         let mut outputs = HashMap::new();
-        outputs.insert("value".to_string(), value);
+        outputs.insert("result".to_string(), Value::Float(a % b));
         Ok(outputs)
     }
 }
@@ -261,6 +292,17 @@ mod tests {
     }
 
     #[test]
+    fn test_subtract_block() {
+        let block = SubtractBlock;
+        let mut context = BlockContext::new();
+        context.inputs.insert("a".to_string(), Value::Float(10.0));
+        context.inputs.insert("b".to_string(), Value::Float(3.0));
+
+        let result = block.execute(context).unwrap();
+        assert_eq!(result.get("result"), Some(&Value::Float(7.0)));
+    }
+
+    #[test]
     fn test_multiply_block() {
         let block = MultiplyBlock;
         let mut context = BlockContext::new();
@@ -272,35 +314,35 @@ mod tests {
     }
 
     #[test]
-    fn test_constant_block() {
-        let block = ConstantBlock;
+    fn test_divide_block() {
+        let block = DivideBlock;
         let mut context = BlockContext::new();
-        context
-            .config
-            .insert("value".to_string(), Value::String("Hello".to_string()));
+        context.inputs.insert("a".to_string(), Value::Float(10.0));
+        context.inputs.insert("b".to_string(), Value::Float(2.0));
 
         let result = block.execute(context).unwrap();
-        assert_eq!(
-            result.get("value"),
-            Some(&Value::String("Hello".to_string()))
-        );
+        assert_eq!(result.get("result"), Some(&Value::Float(5.0)));
     }
 
     #[test]
-    fn test_concat_block() {
-        let block = ConcatBlock;
+    fn test_divide_by_zero() {
+        let block = DivideBlock;
         let mut context = BlockContext::new();
-        context
-            .inputs
-            .insert("a".to_string(), Value::String("Hello".to_string()));
-        context
-            .inputs
-            .insert("b".to_string(), Value::String(" World".to_string()));
+        context.inputs.insert("a".to_string(), Value::Float(10.0));
+        context.inputs.insert("b".to_string(), Value::Float(0.0));
+
+        let result = block.execute(context);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_modulo_block() {
+        let block = ModuloBlock;
+        let mut context = BlockContext::new();
+        context.inputs.insert("a".to_string(), Value::Float(10.0));
+        context.inputs.insert("b".to_string(), Value::Float(3.0));
 
         let result = block.execute(context).unwrap();
-        assert_eq!(
-            result.get("result"),
-            Some(&Value::String("Hello World".to_string()))
-        );
+        assert_eq!(result.get("result"), Some(&Value::Float(1.0)));
     }
 }
