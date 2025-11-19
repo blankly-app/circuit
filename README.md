@@ -118,6 +118,17 @@ rustup target add aarch64-linux-android  # Android ARM64
 rustup target add wasm32-unknown-unknown # WebAssembly
 ```
 
+Alternatively, we recommend using `mise` to manage toolchain versions for
+contributors. With `mise`, run the following from the repository root:
+
+```bash
+# Install mise (if not already installed)
+curl https://mise.run | sh
+eval "$(~/.local/bin/mise activate zsh)" # or bash/fish/pwsh
+mise use rust@1.90.0
+mise install
+```
+
 ### Build All Packages
 
 ```bash

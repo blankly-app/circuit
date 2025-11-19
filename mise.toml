@@ -1,0 +1,15 @@
+[tools]
+# Pin Rust to the repo-friendly toolchain. Use the minor and patch
+# version you prefer; `1.90.0` is recommended for this workspace.
+rust = { version = "1.90.0", postinstall = "rustup component add rustfmt clippy && rustup target add wasm32-unknown-unknown" }
+# Optional tools used by the repo that are helpful when working with WASM packages
+wasm-pack = "0.11"
+wasm-bindgen-cli = "0.2"
+
+[tasks.setup]
+description = "Install configured tools and any optional binaries (wasm-pack, wasm-bindgen)"
+run = """
+mise install
+cargo install --locked wasm-pack || true
+cargo install --locked wasm-bindgen-cli || true
+"""
