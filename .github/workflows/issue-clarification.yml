@@ -24,6 +24,11 @@ jobs:
         with:
           fetch-depth: 1
 
+      - name: Add eyes reaction
+        run: gh api repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/reactions -f content=eyes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Analyze Issue Clarity
         id: claude
         uses: anthropics/claude-code-action@v1
