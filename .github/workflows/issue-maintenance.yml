@@ -1,0 +1,136 @@
+name: Issue Maintenance
+
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  update-issue:
+    # Only run if comment author is associated with the repo
+    if: |
+      github.event.issue && (
+        github.event.comment.author_association == 'OWNER' ||
+        github.event.comment.author_association == 'MEMBER' ||
+        github.event.comment.author_association == 'COLLABORATOR'
+      )
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      issues: write  # Need write to update issue title and body
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Update Issue Title and Body
+        id: claude
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+
+          # Use Haiku for fast, cost-effective processing
+          model: haiku
+
+          prompt: |
+            Update the title and body of issue #${{ github.event.issue.number }} to incorporate new information from the latest comment.
+
+            Your task is to maintain a well-structured, comprehensive issue with a clear title and description that consolidates all relevant information from the discussion.
+
+            **Current Issue Title:** ${{ github.event.issue.title }}
+
+            **Current Issue Body:**
+            ${{ github.event.issue.body }}
+
+            **Latest Comment by @${{ github.event.comment.user.login }}:**
+            ${{ github.event.comment.body }}
+
+            First, fetch ALL comments on this issue using:
+            ```bash
+            gh issue view ${{ github.event.issue.number }} --json comments --jq '.comments[] | "**@\(.author.login)** (\(.createdAt)):\n\(.body)\n"'
+            ```
+
+            Then, analyze all comments to extract:
+            - Additional context or requirements
+            - Clarifications or corrections
+            - Acceptance criteria
+            - Technical details
+            - Links to related issues/PRs
+            - Any other relevant information
+
+            ## Title Guidelines
+
+            Create a clear, concise title that:
+            - Starts with a verb (e.g., "Add", "Fix", "Update", "Implement")
+            - Describes the what, not the how
+            - Is specific but not overly verbose (50-80 characters ideal)
+            - For bugs: describes the problem, not the solution
+            - For features: describes the capability being added
+
+            Examples:
+            - Good: "Add dark mode toggle to settings"
+            - Bad: "Settings page needs improvement"
+            - Good: "Fix authentication timeout on slow connections"
+            - Bad: "Auth not working"
+
+            ## Body Format
+
+            Update the issue body to follow this standard format:
+
+            ```markdown
+            ## Summary
+            [Clear, concise description of the issue/feature]
+
+            ## Problem/Context
+            [What problem does this solve? Why is this needed?]
+
+            ## Expected Behavior
+            [For bugs: what should happen]
+            [For features: what should the new functionality do]
+
+            ## Current Behavior
+            [For bugs only: what currently happens]
+
+            ## Reproduction Steps
+            [For bugs only: numbered steps to reproduce]
+            1.
+            2.
+            3.
+
+            ## Acceptance Criteria
+            [Checklist of what needs to be done]
+            - [ ]
+            - [ ]
+
+            ## Technical Details
+            [Any relevant technical information, file paths, or implementation notes]
+
+            ## Related
+            [Links to related issues, PRs, or discussions]
+
+            ---
+            *Issue body automatically maintained by Claude*
+            ```
+
+            **IMPORTANT RULES:**
+            1. Only update the issue if the new comment contains substantive information that should be preserved in the main issue description
+            2. Do NOT update for simple acknowledgments, thanks, or "+1" comments
+            3. Preserve all existing information - only add or clarify, never remove
+            4. Omit sections that are not applicable (e.g., no "Current Behavior" for feature requests)
+            5. Keep the language clear, professional, and action-oriented
+            6. If there's conflicting information, note it in the relevant section
+            7. Update the title if the scope or focus of the issue has changed based on the discussion
+
+            Use `gh issue edit ${{ github.event.issue.number }} --title "New Title Here" --body "$(cat <<'EOF'
+            [new body here]
+            EOF
+            )"` to update both the title and body.
+
+            If the comment doesn't add substantive information worth incorporating into the issue, do NOT update anything. Simply exit successfully.
+
+          # Limit Claude to only use gh commands and Read tool
+          claude_args: '--allowed-tools Bash(gh issue *),Read'

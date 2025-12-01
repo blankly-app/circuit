@@ -1,0 +1,69 @@
+name: Issue Clarification Assistant
+
+on:
+  issues:
+    types: [opened, labeled]
+
+jobs:
+  check-issue-clarity:
+    # Only run if:
+    # 1. Issue has the "prepare" label, OR
+    # 2. Issue author has write access (is a contributor)
+    if: |
+      (github.event_name == 'issues' && github.event.action == 'labeled' && github.event.label.name == 'prepare') ||
+      (github.event_name == 'issues' && github.event.action == 'opened' && (
+        github.event.issue.author_association == 'OWNER' ||
+        github.event.issue.author_association == 'MEMBER' ||
+        github.event.issue.author_association == 'COLLABORATOR'
+      ))
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      issues: write  # Need write to post comments
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Analyze Issue Clarity
+        id: claude
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+
+          prompt: |
+            Analyze issue #${{ github.event.issue.number }} for clarity and completeness.
+
+            Your task is to determine if this issue provides enough information for either a developer or an AI agent to start working on it effectively.
+
+            Check if the issue includes:
+            1. Clear description of the problem or feature request
+            2. Expected behavior vs actual behavior (for bugs)
+            3. Steps to reproduce (for bugs)
+            4. Acceptance criteria or desired outcome
+            5. Any relevant context about where in the codebase this relates to
+
+            Issue Title: ${{ github.event.issue.title }}
+
+            Issue Body:
+            ${{ github.event.issue.body }}
+
+            If the issue is NOT clear enough, use the `gh issue comment` command to post a helpful comment asking for specific clarifications. Be polite, constructive, and specific about what information is missing.
+
+            Your comment should:
+            - Thank them for opening the issue
+            - Explain what additional information would be helpful
+            - Ask specific questions about the missing details
+            - Be encouraging and collaborative in tone
+
+            If the issue IS clear enough, do NOT post any comment. Simply exit successfully.
+
+            IMPORTANT: Only post ONE comment if clarification is needed. Do not post multiple comments.
+
+          # Limit Claude to only use gh commands for issue comments (read-only on repo)
+          claude_args: '--allowed-tools Bash(gh issue comment *),Read'
