@@ -7,12 +7,7 @@ on:
 jobs:
   update-issue:
     # Only run if comment author is associated with the repo
-    if: |
-      github.event.issue && (
-        github.event.comment.author_association == 'OWNER' ||
-        github.event.comment.author_association == 'MEMBER' ||
-        github.event.comment.author_association == 'COLLABORATOR'
-      )
+    if: github.event.issue && contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association)
 
     runs-on: ubuntu-latest
 

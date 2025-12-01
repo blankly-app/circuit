@@ -9,13 +9,7 @@ jobs:
     # Only run if:
     # 1. Issue has the "prepare" label, OR
     # 2. Issue author has write access (is a contributor)
-    if: |
-      (github.event_name == 'issues' && github.event.action == 'labeled' && github.event.label.name == 'prepare') ||
-      (github.event_name == 'issues' && github.event.action == 'opened' && (
-        github.event.issue.author_association == 'OWNER' ||
-        github.event.issue.author_association == 'MEMBER' ||
-        github.event.issue.author_association == 'COLLABORATOR'
-      ))
+    if: (github.event.action == 'labeled' && github.event.label.name == 'prepare') || (github.event.action == 'opened' && contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.issue.author_association))
 
     runs-on: ubuntu-latest
 
