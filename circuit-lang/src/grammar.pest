@@ -2,12 +2,19 @@
 // Supports .block and .flow file definitions
 
 WHITESPACE = _{ " " | "\t" | "\r" | "\n" }
-COMMENT = _{ "//" ~ (!"\n" ~ ANY)* }
+COMMENT = _{
+    "//" ~ (!"\n" ~ ANY)*
+    | "/*" ~ (!"*/" ~ ANY)* ~ "*/"
+}
 
 // Identifiers and literals
 identifier = @{ ASCII_ALPHA ~ (ASCII_ALPHANUMERIC | "_")* }
 qualified_name = @{ identifier ~ ("." ~ identifier)* }
-string_literal = @{ "\"" ~ (!"\"" ~ ANY)* ~ "\"" }
+string_char = @{
+    !("\"" | "\\") ~ ANY
+    | "\\" ~ ("\"" | "\\" | "/" | "n" | "r" | "t" | "b" | "f")
+}
+string_literal = @{ "\"" ~ string_char* ~ "\"" }
 number_literal = @{ "-"? ~ ASCII_DIGIT+ ~ ("." ~ ASCII_DIGIT+)? }
 bool_literal = @{ "true" | "false" }
 null_literal = @{ "null" }
