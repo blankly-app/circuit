@@ -1062,17 +1062,18 @@ impl Block for SubstringBlock {
                 CircuitError::InvalidInput("Missing or invalid input 'end'".to_string())
             })? as usize;
 
-        if start > end || end > value.len() {
+        // Use character-based indexing to avoid panic on multi-byte UTF-8 characters
+        let char_count = value.chars().count();
+        if start > end || end > char_count {
             return Err(CircuitError::InvalidInput(
                 "Invalid substring range".to_string(),
             ));
         }
 
+        let substring: String = value.chars().skip(start).take(end - start).collect();
+
         let mut outputs = HashMap::new();
-        outputs.insert(
-            "result".to_string(),
-            Value::String(value[start..end].to_string()),
-        );
+        outputs.insert("result".to_string(), Value::String(substring));
         Ok(outputs)
     }
 }
@@ -1145,5 +1146,55 @@ mod tests {
 
         let result = block.execute(context).unwrap();
         assert_eq!(result.get("result"), Some(&Value::Float(1.0)));
+    }
+
+    #[test]
+    fn test_substring_block_ascii() {
+        let block = SubstringBlock;
+        let mut context = BlockContext::new();
+        context
+            .inputs
+            .insert("value".to_string(), Value::String("Hello World".to_string()));
+        context.inputs.insert("start".to_string(), Value::Float(0.0));
+        context.inputs.insert("end".to_string(), Value::Float(5.0));
+
+        let result = block.execute(context).unwrap();
+        assert_eq!(
+            result.get("result"),
+            Some(&Value::String("Hello".to_string()))
+        );
+    }
+
+    #[test]
+    fn test_substring_block_utf8() {
+        // Test with multi-byte UTF-8 characters to ensure we use character-based indexing
+        let block = SubstringBlock;
+        let mut context = BlockContext::new();
+        // Chinese characters: each character is 3 bytes, but should count as 1 char
+        context
+            .inputs
+            .insert("value".to_string(), Value::String("你好世界".to_string()));
+        context.inputs.insert("start".to_string(), Value::Float(0.0));
+        context.inputs.insert("end".to_string(), Value::Float(2.0));
+
+        let result = block.execute(context).unwrap();
+        assert_eq!(
+            result.get("result"),
+            Some(&Value::String("你好".to_string()))
+        );
+    }
+
+    #[test]
+    fn test_substring_block_invalid_range() {
+        let block = SubstringBlock;
+        let mut context = BlockContext::new();
+        context
+            .inputs
+            .insert("value".to_string(), Value::String("Hello".to_string()));
+        context.inputs.insert("start".to_string(), Value::Float(3.0));
+        context.inputs.insert("end".to_string(), Value::Float(10.0)); // end > char_count
+
+        let result = block.execute(context);
+        assert!(result.is_err());
     }
 }
