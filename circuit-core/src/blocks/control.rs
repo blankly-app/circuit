@@ -113,12 +113,13 @@ impl Block for SwitchBlock {
     }
 
     fn execute(&self, context: BlockContext) -> Result<HashMap<String, Value>> {
-        let selector = context
+        let selector_f = context
             .get_input("selector")
             .and_then(|v| v.as_float())
             .ok_or_else(|| {
                 CircuitError::InvalidInput("Missing or invalid input 'selector'".to_string())
-            })? as i64;
+            })?;
+        let selector = selector_f.round() as i64;
         let a = context
             .get_input("a")
             .ok_or_else(|| CircuitError::InvalidInput("Missing input 'a'".to_string()))?
@@ -518,6 +519,56 @@ mod tests {
         assert_eq!(
             result.get("result"),
             Some(&Value::String("fallback".to_string()))
+        );
+    }
+
+    #[test]
+    fn test_switch_fractional_selector_rounds() {
+        let block = SwitchBlock;
+        let mut context = BlockContext::new();
+        context
+            .inputs
+            .insert("selector".to_string(), Value::Float(0.9));
+        context
+            .inputs
+            .insert("a".to_string(), Value::String("first".to_string()));
+        context
+            .inputs
+            .insert("b".to_string(), Value::String("second".to_string()));
+        context
+            .inputs
+            .insert("default".to_string(), Value::String("fallback".to_string()));
+
+        // 0.9 rounds to 1, so should select b
+        let result = block.execute(context).unwrap();
+        assert_eq!(
+            result.get("result"),
+            Some(&Value::String("second".to_string()))
+        );
+    }
+
+    #[test]
+    fn test_switch_small_negative_rounds_to_zero() {
+        let block = SwitchBlock;
+        let mut context = BlockContext::new();
+        context
+            .inputs
+            .insert("selector".to_string(), Value::Float(-0.1));
+        context
+            .inputs
+            .insert("a".to_string(), Value::String("first".to_string()));
+        context
+            .inputs
+            .insert("b".to_string(), Value::String("second".to_string()));
+        context
+            .inputs
+            .insert("default".to_string(), Value::String("fallback".to_string()));
+
+        // -0.1 rounds to 0, so should select a
+        let result = block.execute(context).unwrap();
+        assert_eq!(
+            result.get("result"),
+            Some(&Value::String("first".to_string()))
         );
     }
 
