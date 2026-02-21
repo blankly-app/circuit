@@ -617,6 +617,12 @@ impl Block for ClampBlock {
                 CircuitError::InvalidInput("Missing or invalid input 'max'".to_string())
             })?;
 
+        if value.is_nan() || min.is_nan() || max.is_nan() {
+            return Err(CircuitError::BlockExecution(
+                "Clamp: inputs must not be NaN".to_string(),
+            ));
+        }
+
         if min > max {
             return Err(CircuitError::BlockExecution(
                 "Clamp: min must be <= max".to_string(),
@@ -1753,6 +1759,52 @@ mod tests {
             .insert("value".to_string(), Value::Float(5.0));
         context.inputs.insert("min".to_string(), Value::Float(10.0));
         context.inputs.insert("max".to_string(), Value::Float(0.0));
+
+        let result = block.execute(context);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_clamp_nan_value() {
+        let block = ClampBlock;
+        let mut context = BlockContext::new();
+        context
+            .inputs
+            .insert("value".to_string(), Value::Float(f64::NAN));
+        context.inputs.insert("min".to_string(), Value::Float(0.0));
+        context.inputs.insert("max".to_string(), Value::Float(10.0));
+
+        let result = block.execute(context);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_clamp_nan_min() {
+        let block = ClampBlock;
+        let mut context = BlockContext::new();
+        context
+            .inputs
+            .insert("value".to_string(), Value::Float(5.0));
+        context
+            .inputs
+            .insert("min".to_string(), Value::Float(f64::NAN));
+        context.inputs.insert("max".to_string(), Value::Float(10.0));
+
+        let result = block.execute(context);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_clamp_nan_max() {
+        let block = ClampBlock;
+        let mut context = BlockContext::new();
+        context
+            .inputs
+            .insert("value".to_string(), Value::Float(5.0));
+        context.inputs.insert("min".to_string(), Value::Float(0.0));
+        context
+            .inputs
+            .insert("max".to_string(), Value::Float(f64::NAN));
 
         let result = block.execute(context);
         assert!(result.is_err());
