@@ -1,0 +1,27 @@
+flow string_transform {
+    description "Uppercase then split hello world"
+
+    node input: core.constant {
+        value = "hello world"
+        position(100, 100)
+    }
+
+    node space: core.constant {
+        value = " "
+        position(100, 200)
+    }
+
+    node upper: string.uppercase {
+        position(300, 100)
+    }
+
+    node split: string.split {
+        position(500, 150)
+    }
+
+    connect input.value -> upper.value
+    connect upper.result -> split.value
+    connect space.value -> split.delimiter
+
+    output split.result
+}

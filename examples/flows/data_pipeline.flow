@@ -49,8 +49,8 @@ flow data_pipeline {
     connect data3.value -> stage2.b
     connect stage2.result -> stage3.a
     connect bonus.value -> stage3.b
-    connect stage3.result -> result.input
+    connect stage3.result -> result.value
 
     // Output: should be (10 + 20) * 30 + 100 = 1000
-    output result.output
+    output result.value
 }

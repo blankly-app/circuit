@@ -12,6 +12,14 @@ serde_json.workspace = true
 thiserror.workspace = true
 anyhow.workspace = true
 
+[dev-dependencies]
+circuit-lang = { path = "../circuit-lang" }
+criterion = { version = "0.5", features = ["html_reports"] }
+
 [[example]]
 name = "calculator"
 path = "../examples/calculator.rs"
+
+[[bench]]
+name = "engine_benchmarks"
+harness = false

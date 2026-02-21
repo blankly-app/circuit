@@ -35,8 +35,8 @@ flow calculator {
     connect const3.value -> add.b
     connect add.result -> multiply.a
     connect const2.value -> multiply.b
-    connect multiply.result -> debug.input
+    connect multiply.result -> debug.value
 
     // Output
-    output debug.output
+    output debug.value
 }

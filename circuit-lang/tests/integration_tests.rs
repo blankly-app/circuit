@@ -43,6 +43,9 @@ fn test_load_all_flow_examples() {
         "flows/calculator.flow",
         "flows/string_processing.flow",
         "flows/data_pipeline.flow",
+        "flows/advanced_math.flow",
+        "flows/conditional.flow",
+        "flows/string_transform.flow",
     ];
 
     for file in flow_files {
