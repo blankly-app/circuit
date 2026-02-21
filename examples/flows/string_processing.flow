@@ -37,7 +37,7 @@ flow string_processing {
     connect world.value -> concat2.b
 
     // Debug output
-    connect concat2.result -> debug.input
+    connect concat2.result -> debug.value
 
-    output debug.output
+    output debug.value
 }

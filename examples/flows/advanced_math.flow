@@ -1,0 +1,32 @@
+flow advanced_math {
+    description "Computes abs(sqrt(9) - 4) = 1"
+
+    node nine: core.constant {
+        value = 9
+        position(100, 100)
+    }
+
+    node four: core.constant {
+        value = 4
+        position(100, 200)
+    }
+
+    node sqrt: math.sqrt {
+        position(250, 100)
+    }
+
+    node sub: math.subtract {
+        position(400, 150)
+    }
+
+    node abs: math.abs {
+        position(550, 150)
+    }
+
+    connect nine.value -> sqrt.value
+    connect sqrt.result -> sub.a
+    connect four.value -> sub.b
+    connect sub.result -> abs.value
+
+    output abs.result
+}

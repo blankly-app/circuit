@@ -309,7 +309,7 @@ mod tests {
     fn test_and_block() {
         let block = AndBlock;
         let mut context = BlockContext::new();
-        
+
         // True && True = True
         context.inputs.insert("a".to_string(), Value::Bool(true));
         context.inputs.insert("b".to_string(), Value::Bool(true));
@@ -326,7 +326,7 @@ mod tests {
     fn test_or_block() {
         let block = OrBlock;
         let mut context = BlockContext::new();
-        
+
         // False || False = False
         context.inputs.insert("a".to_string(), Value::Bool(false));
         context.inputs.insert("b".to_string(), Value::Bool(false));
@@ -343,14 +343,18 @@ mod tests {
     fn test_not_block() {
         let block = NotBlock;
         let mut context = BlockContext::new();
-        
+
         // !True = False
-        context.inputs.insert("value".to_string(), Value::Bool(true));
+        context
+            .inputs
+            .insert("value".to_string(), Value::Bool(true));
         let result = block.execute(context.clone()).unwrap();
         assert_eq!(result.get("result"), Some(&Value::Bool(false)));
 
         // !False = True
-        context.inputs.insert("value".to_string(), Value::Bool(false));
+        context
+            .inputs
+            .insert("value".to_string(), Value::Bool(false));
         let result = block.execute(context).unwrap();
         assert_eq!(result.get("result"), Some(&Value::Bool(true)));
     }
@@ -359,7 +363,7 @@ mod tests {
     fn test_equal_block() {
         let block = EqualBlock;
         let mut context = BlockContext::new();
-        
+
         // 5 == 5
         context.inputs.insert("a".to_string(), Value::Float(5.0));
         context.inputs.insert("b".to_string(), Value::Float(5.0));
@@ -372,8 +376,12 @@ mod tests {
         assert_eq!(result.get("result"), Some(&Value::Bool(false)));
 
         // "hello" == "hello"
-        context.inputs.insert("a".to_string(), Value::String("hello".to_string()));
-        context.inputs.insert("b".to_string(), Value::String("hello".to_string()));
+        context
+            .inputs
+            .insert("a".to_string(), Value::String("hello".to_string()));
+        context
+            .inputs
+            .insert("b".to_string(), Value::String("hello".to_string()));
         let result = block.execute(context).unwrap();
         assert_eq!(result.get("result"), Some(&Value::Bool(true)));
     }
@@ -382,7 +390,7 @@ mod tests {
     fn test_greater_block() {
         let block = GreaterBlock;
         let mut context = BlockContext::new();
-        
+
         // 5 > 3 = True
         context.inputs.insert("a".to_string(), Value::Float(5.0));
         context.inputs.insert("b".to_string(), Value::Float(3.0));
@@ -400,7 +408,7 @@ mod tests {
     fn test_less_block() {
         let block = LessBlock;
         let mut context = BlockContext::new();
-        
+
         // 3 < 5 = True
         context.inputs.insert("a".to_string(), Value::Float(3.0));
         context.inputs.insert("b".to_string(), Value::Float(5.0));
@@ -414,4 +422,3 @@ mod tests {
         assert_eq!(result.get("result"), Some(&Value::Bool(false)));
     }
 }
-

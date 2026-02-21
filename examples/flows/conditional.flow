@@ -1,0 +1,39 @@
+flow conditional {
+    description "If 10 > 5 then yes else no"
+
+    node ten: core.constant {
+        value = 10
+        position(100, 100)
+    }
+
+    node five: core.constant {
+        value = 5
+        position(100, 200)
+    }
+
+    node yes: core.constant {
+        value = "yes"
+        position(100, 300)
+    }
+
+    node no: core.constant {
+        value = "no"
+        position(100, 400)
+    }
+
+    node cmp: logic.greater {
+        position(300, 150)
+    }
+
+    node branch: control.if {
+        position(500, 250)
+    }
+
+    connect ten.value -> cmp.a
+    connect five.value -> cmp.b
+    connect cmp.result -> branch.condition
+    connect yes.value -> branch.then_value
+    connect no.value -> branch.else_value
+
+    output branch.result
+}
