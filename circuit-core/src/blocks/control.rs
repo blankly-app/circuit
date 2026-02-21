@@ -119,6 +119,11 @@ impl Block for SwitchBlock {
             .ok_or_else(|| {
                 CircuitError::InvalidInput("Missing or invalid input 'selector'".to_string())
             })?;
+        if !selector_f.is_finite() {
+            return Err(CircuitError::BlockExecution(
+                "Switch: selector must be finite".to_string(),
+            ));
+        }
         let selector = selector_f.round() as i64;
         let a = context
             .get_input("a")
@@ -570,6 +575,48 @@ mod tests {
             result.get("result"),
             Some(&Value::String("first".to_string()))
         );
+    }
+
+    #[test]
+    fn test_switch_nan_selector() {
+        let block = SwitchBlock;
+        let mut context = BlockContext::new();
+        context
+            .inputs
+            .insert("selector".to_string(), Value::Float(f64::NAN));
+        context
+            .inputs
+            .insert("a".to_string(), Value::String("first".to_string()));
+        context
+            .inputs
+            .insert("b".to_string(), Value::String("second".to_string()));
+        context
+            .inputs
+            .insert("default".to_string(), Value::String("fallback".to_string()));
+
+        let result = block.execute(context);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_switch_infinity_selector() {
+        let block = SwitchBlock;
+        let mut context = BlockContext::new();
+        context
+            .inputs
+            .insert("selector".to_string(), Value::Float(f64::INFINITY));
+        context
+            .inputs
+            .insert("a".to_string(), Value::String("first".to_string()));
+        context
+            .inputs
+            .insert("b".to_string(), Value::String("second".to_string()));
+        context
+            .inputs
+            .insert("default".to_string(), Value::String("fallback".to_string()));
+
+        let result = block.execute(context);
+        assert!(result.is_err());
     }
 
     #[test]
