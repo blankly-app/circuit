@@ -70,13 +70,45 @@ fn parse_block_body(pair: pest::iterators::Pair<Rule>, block_def: &mut BlockDef)
 fn parse_description(pair: pest::iterators::Pair<Rule>) -> Result<String> {
     for inner in pair.into_inner() {
         if inner.as_rule() == Rule::string_literal {
-            let s = inner.as_str();
-            return Ok(s[1..s.len() - 1].to_string()); // Remove quotes
+            return parse_string_literal(&inner);
         }
     }
     Err(LangError::ParseError(
         "Missing description string".to_string(),
     ))
+}
+
+fn parse_string_literal(pair: &pest::iterators::Pair<Rule>) -> Result<String> {
+    let s = pair.as_str();
+    let content = &s[1..s.len() - 1]; // Remove quotes
+
+    // Process escape sequences
+    let mut result = String::new();
+    let mut chars = content.chars();
+    while let Some(ch) = chars.next() {
+        if ch == '\\' {
+            if let Some(next) = chars.next() {
+                match next {
+                    'n' => result.push('\n'),
+                    'r' => result.push('\r'),
+                    't' => result.push('\t'),
+                    'b' => result.push('\u{0008}'),
+                    'f' => result.push('\u{000C}'),
+                    '\\' => result.push('\\'),
+                    '/' => result.push('/'),
+                    '"' => result.push('"'),
+                    _ => {
+                        result.push('\\');
+                        result.push(next);
+                    }
+                }
+            }
+        } else {
+            result.push(ch);
+        }
+    }
+
+    Ok(result)
 }
 
 fn parse_port_def(pair: pest::iterators::Pair<Rule>) -> Result<PortDef> {
@@ -192,10 +224,7 @@ fn parse_value(pair: pest::iterators::Pair<Rule>) -> Result<Value> {
                 .map_err(|e| LangError::ParseError(format!("Invalid number: {}", e)))?;
             Ok(Value::Number(num))
         }
-        Rule::string_literal => {
-            let s = inner.as_str();
-            Ok(Value::String(s[1..s.len() - 1].to_string()))
-        }
+        Rule::string_literal => Ok(Value::String(parse_string_literal(&inner)?)),
         Rule::array_value => {
             let mut values = Vec::new();
             for item in inner.into_inner() {
@@ -232,8 +261,7 @@ fn parse_object_pair(pair: pest::iterators::Pair<Rule>) -> Result<(String, Value
                 key = inner.as_str().to_string();
             }
             Rule::string_literal => {
-                let s = inner.as_str();
-                key = s[1..s.len() - 1].to_string();
+                key = parse_string_literal(&inner)?;
             }
             Rule::value => {
                 value = Some(parse_value(inner)?);

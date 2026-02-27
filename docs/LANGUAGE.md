@@ -102,6 +102,42 @@ execute {
 }
 ```
 
+### Operator Precedence
+
+Operators are evaluated in the following order (highest to lowest precedence):
+
+| Precedence | Operators | Description | Associativity |
+|------------|-----------|-------------|---------------|
+| 1 (highest) | `()` | Parentheses (grouping) | N/A |
+| 2 | `.` | Member access | Left-to-right |
+| 3 | `f()` | Function call | Left-to-right |
+| 4 | `!` `-` (unary) | Logical NOT, Negation | Right-to-left |
+| 5 | `*` `/` `%` | Multiplication, Division, Modulo | Left-to-right |
+| 6 | `+` `-` | Addition, Subtraction | Left-to-right |
+| 7 | `<` `>` `<=` `>=` | Comparison | Left-to-right |
+| 8 | `==` `!=` | Equality | Left-to-right |
+| 9 | `&&` | Logical AND | Left-to-right |
+| 10 (lowest) | `||` | Logical OR | Left-to-right |
+
+**Examples:**
+
+```
+// Without parentheses: 2 + 3 * 4 = 2 + 12 = 14
+result = 2 + 3 * 4
+
+// With parentheses: (2 + 3) * 4 = 5 * 4 = 20
+result = (2 + 3) * 4
+
+// Comparison has lower precedence than arithmetic
+is_positive = x + 1 > 0  // Same as: (x + 1) > 0
+
+// Logical AND has higher precedence than OR
+result = a || b && c  // Same as: a || (b && c)
+
+// Use parentheses for clarity
+result = (a || b) && c
+```
+
 ### Complete Block Example
 
 ```
@@ -425,11 +461,64 @@ engine.load_graph(graph)?;
 
 ## Syntax Rules
 
-- **Comments**: Use `//` for single-line comments
-- **Whitespace**: Whitespace is flexible and ignored
-- **Identifiers**: Must start with a letter, can contain letters, numbers, and underscores
-- **Qualified names**: Use dots to create namespaces (e.g., `math.advanced.fft`)
-- **Case sensitivity**: All identifiers are case-sensitive
+### Comments
+- **Single-line**: Use `//` for comments that extend to end of line
+- **Multi-line**: Use `/* ... */` for comments spanning multiple lines
+- Comments can appear anywhere whitespace is allowed
+
+```
+// This is a single-line comment
+
+/* This is a multi-line comment
+   that spans several lines */
+
+block test.example { /* inline comment */ }
+```
+
+### Whitespace
+- Whitespace (spaces, tabs, newlines) is flexible and ignored except inside strings
+- Use any indentation style you prefer
+- Multiple blank lines are allowed
+
+### Identifiers
+- Must start with a letter (a-z, A-Z)
+- Can contain letters, numbers, and underscores
+- Cannot be keywords: `block`, `flow`, `input`, `output`, `config`, `execute`, `connect`, `node`, `description`, `default`, `position`, `if`, `else`, `return`, `true`, `false`, `null`
+- **Case sensitive**: `myVar` and `myvar` are different
+
+### Qualified Names
+- Use dots to create namespaces: `namespace.subnamespace.name`
+- Block IDs should be qualified: `math.add`, `string.concat`, `io.http.get`
+- Flow names are simple identifiers (no dots)
+
+### String Literals
+- Enclosed in double quotes: `"hello world"`
+- Support escape sequences:
+  - `\n` - newline
+  - `\t` - tab
+  - `\r` - carriage return
+  - `\b` - backspace
+  - `\f` - form feed
+  - `\\` - backslash
+  - `\"` - double quote
+  - `\/` - forward slash
+
+```
+"Line 1\nLine 2"
+"Path: C:\\Users\\Name"
+"She said \"Hello\""
+```
+
+### Numbers
+- Integer: `42`, `-10`
+- Floating-point: `3.14159`, `-0.5`
+- No scientific notation support (yet)
+
+### Arrays and Objects
+- Arrays use square brackets: `[1, 2, 3]`
+- Objects use curly braces: `{"key": "value"}`
+- Nested structures are supported: `[[1, 2], [3, 4]]`
+- Mixed types in arrays: `[1, "two", true, null]`
 
 ## Error Handling
 
@@ -448,6 +537,110 @@ Common errors:
 - Malformed connections (must be `node.port -> node.port`)
 - Type mismatches
 - Invalid identifiers
+
+## Common Mistakes and Edge Cases
+
+### Block Names
+❌ **Incorrect:**
+```
+block MyBlock { }           // Missing namespace
+block math. { }             // Trailing dot
+block .add { }              // Leading dot
+block 123block { }          // Starting with number
+```
+
+✅ **Correct:**
+```
+block math.add { }
+block my.namespace.block { }
+block simple_block { }      // Single segment is okay
+```
+
+### Flow Names
+❌ **Incorrect:**
+```
+flow my.flow { }            // Flow names cannot be qualified
+```
+
+✅ **Correct:**
+```
+flow my_flow { }
+flow calculator { }
+```
+
+### String Escaping
+❌ **Incorrect:**
+```
+str = "C:\Users\Name"       // Unescaped backslashes
+```
+
+✅ **Correct:**
+```
+str = "C:\\Users\\Name"
+str = "Say \"hello\""
+str = "Line 1\nLine 2"
+```
+
+### Connections
+❌ **Incorrect:**
+```
+connect node1 -> node2      // Missing port names
+connect n1.port             // Missing destination
+connect n1.port -> n2       // Missing destination port
+```
+
+✅ **Correct:**
+```
+connect node1.output -> node2.input
+```
+
+### Empty Collections
+✅ **Valid:**
+```
+empty_arr = []
+empty_obj = {}
+```
+
+### Mixed Types
+✅ **Valid - Arrays can contain mixed types:**
+```
+mixed = [1, "two", true, null, [3, 4]]
+```
+
+### Comments
+✅ **Valid:**
+```
+// Single line comment
+/* Multi-line
+   comment */
+block test.example { /* inline */ }
+```
+
+### Optional Braces
+Both styles are valid:
+
+```
+// With braces
+input x: Number {
+    description "Input value"
+    default = 0
+}
+
+// Without braces (if no description or default)
+input x: Number
+output y: Number
+```
+
+### Expression Parentheses
+Always use parentheses when precedence might be unclear:
+
+```
+// Unclear:
+result = a + b * c - d / e
+
+// Clear:
+result = a + (b * c) - (d / e)
+```
 
 ## Future Extensions
 
